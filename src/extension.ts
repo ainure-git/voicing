@@ -13,6 +13,7 @@ import { TerminalVoiceController } from './controller'
 import { createTtsEngine } from './tts/factory'
 import { readConfig, CONFIG_SECTION } from './configService'
 import { TtsEngine } from './tts/engine'
+import { disposeOneShots } from './tts/windowsRuntime'
 import { PlaybackStatus } from './types'
 
 let engineRef: TtsEngine | undefined
@@ -43,7 +44,10 @@ export function activate(context: vscode.ExtensionContext): void {
   statusSink = (status) => controller.updateStatus(status)
 
   const applyEnabled = (): void => {
-    statusBar.setEnabled(readConfig().enabled)
+    const cfg = readConfig()
+    // Controls are shown only when the extension is enabled AND the user wants
+    // status-bar controls.
+    statusBar.setEnabled(cfg.enabled && cfg.showStatusBarControls)
   }
   applyEnabled()
 
@@ -79,6 +83,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(channel, statusBar, {
     dispose: () => {
       void engine.dispose()
+      disposeOneShots()
     },
   })
 
@@ -90,4 +95,5 @@ export function deactivate(): void {
     void engineRef.dispose()
     engineRef = undefined
   }
+  disposeOneShots()
 }

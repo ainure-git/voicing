@@ -52,6 +52,20 @@ describe('PlaybackState', () => {
     expect(count).toBe(1)
   })
 
+  it('allows a new read (-> preparing) while playing or paused', () => {
+    const s = new PlaybackState()
+    s.transition('playing')
+    expect(s.transition('preparing')).toBe(true)
+  })
+
+  it('allows stop (-> stopped) after an error so the status bar can clear', () => {
+    const s = new PlaybackState()
+    s.transition('error')
+    expect(s.current).toBe('error')
+    expect(s.transition('stopped')).toBe(true)
+    expect(s.current).toBe('stopped')
+  })
+
   it('reports isActive correctly', () => {
     const s = new PlaybackState()
     expect(s.isActive).toBe(false)

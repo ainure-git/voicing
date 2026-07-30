@@ -32,15 +32,20 @@ export function improvePronunciation(input: string): string {
   //    identifier splitting so "TypeScript" survives intact.
   text = text.replace(/\bTS(\d{3,5})\b/g, 'error TypeScript $1')
 
+  // The filename pattern is written non-overlapping (the segment class excludes
+  // the dot, which only appears as an explicit separator) to avoid polynomial
+  // backtracking on long dotted/word runs that lack the ":digits" suffix.
+  const filename = '([\\w-]+(?:\\.[\\w-]+)*\\.[a-zA-Z]{1,6})'
+
   // 6. file:line:col -> "archivo <file>, línea <n>, columna <n>".
   text = text.replace(
-    /\b([\w.-]+\.[a-zA-Z]{1,6}):(\d+):(\d+)\b/g,
+    new RegExp(`\\b${filename}:(\\d+):(\\d+)\\b`, 'g'),
     (_m, file: string, ln: string, col: string) => `archivo ${file}, línea ${ln}, columna ${col}`,
   )
 
   // 7. file:line -> "archivo <file>, línea <n>".
   text = text.replace(
-    /\b([\w.-]+\.[a-zA-Z]{1,6}):(\d+)\b/g,
+    new RegExp(`\\b${filename}:(\\d+)\\b`, 'g'),
     (_m, file: string, ln: string) => `archivo ${file}, línea ${ln}`,
   )
 

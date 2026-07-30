@@ -5,9 +5,42 @@
  * engine core stays pure and testable.
  */
 
-import { spawn as nodeSpawn } from 'child_process'
+import { spawn as nodeSpawn, ChildProcess } from 'child_process'
 import * as path from 'path'
 import { SpawnFn, TtsChildProcess, buildListArgs, buildTestArgs } from './engine'
+
+/**
+ * Registry of one-shot helper processes (list voices / test voice). The main
+ * controller process is managed by the engine, but these short-lived helpers
+ * must also be killable on deactivate so nothing is orphaned — e.g. a blocking
+ * `test` speak that is still running when the window reloads.
+ */
+const oneShots = new Set<ChildProcess>()
+
+function track<T extends ChildProcess>(child: T): T {
+  oneShots.add(child)
+  const forget = (): void => {
+    oneShots.delete(child)
+  }
+  child.on('exit', forget)
+  child.on('error', forget)
+  return child
+}
+
+/** Kills any still-running one-shot helper processes. */
+export function disposeOneShots(): void {
+  for (const child of oneShots) {
+    try {
+      if (child.pid !== undefined) {
+        killTree(child.pid)
+      }
+      child.kill()
+    } catch {
+      /* best effort */
+    }
+  }
+  oneShots.clear()
+}
 
 /**
  * Windows PowerShell (5.1) is preferred over pwsh 7 because System.Speech is
@@ -56,10 +89,12 @@ export interface InstalledVoice {
 /** Runs the script in "list" mode and parses the installed voices. */
 export function listInstalledVoices(powershellPath: string, scriptPath: string): Promise<InstalledVoice[]> {
   return new Promise((resolve, reject) => {
-    const child = nodeSpawn(powershellPath, buildListArgs(scriptPath), {
-      windowsHide: true,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    })
+    const child = track(
+      nodeSpawn(powershellPath, buildListArgs(scriptPath), {
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }),
+    )
     let out = ''
     let err = ''
     child.stdout.on('data', (d) => {
@@ -97,12 +132,15 @@ export function speakTest(
   sapiRate: number,
   volume: number,
   voice: string,
+  language = '',
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = nodeSpawn(powershellPath, buildTestArgs(scriptPath, sapiRate, volume, voice), {
-      windowsHide: true,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    })
+    const child = track(
+      nodeSpawn(powershellPath, buildTestArgs(scriptPath, sapiRate, volume, voice, language), {
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }),
+    )
     let err = ''
     child.stderr.on('data', (d) => {
       err += String(d)

@@ -23,7 +23,7 @@ Primera versión (MVP).
 - **Controles en barra de estado**, paleta de comandos y menú contextual de la terminal.
 - **Configuración validada** con descripciones en español e inglés.
 - Compatibilidad no destructiva en macOS/Linux (aviso de motor solo-Windows).
-- Suite de **pruebas unitarias** (91 pruebas) y empaquetado `.vsix` reproducible.
+- Suite de **pruebas unitarias** (96 pruebas) y empaquetado `.vsix` reproducible.
 
 ### Limitaciones conocidas
 - Motor de voz solo Windows en esta versión.

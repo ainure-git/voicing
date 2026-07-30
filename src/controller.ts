@@ -45,6 +45,9 @@ export class TerminalVoiceController {
     if (!config.enabled) {
       return
     }
+    if (!this.ensureCanStart(config)) {
+      return
+    }
     if (!vscode.window.activeTerminal) {
       void vscode.window.showInformationMessage('Terminal Voice: no hay una terminal activa.')
       return
@@ -90,6 +93,9 @@ export class TerminalVoiceController {
     if (!config.enabled) {
       return
     }
+    if (!this.ensureCanStart(config)) {
+      return
+    }
     const text = await vscode.env.clipboard.readText()
     if (!text || text.trim().length === 0) {
       void vscode.window.showInformationMessage('Terminal Voice: el portapapeles está vacío. Copia texto con Ctrl+C.')
@@ -125,6 +131,7 @@ export class TerminalVoiceController {
         multiplierToSapiRate(config.rate),
         config.volume,
         config.voice,
+        config.language,
       )
     } catch (err) {
       this.logger.error(`test voice failed: ${(err as Error).message}`)
@@ -230,6 +237,7 @@ export class TerminalVoiceController {
         sapiRate: multiplierToSapiRate(config.rate),
         volume: config.volume,
         voice: config.voice,
+        language: config.language,
       })
     } catch (err) {
       this.logger.error(`speak failed: ${(err as Error).message}`)
@@ -245,6 +253,21 @@ export class TerminalVoiceController {
       this.logger.debug(`copy command resolved: ${this.copyCommand ?? 'none'}`)
     }
     return this.copyCommand
+  }
+
+  /**
+   * Enforces `autoStopPrevious`. When it is disabled and a reading is already
+   * active, a new read is refused (rather than silently interrupting), which is
+   * the only way to honour the setting with a single voice process.
+   */
+  private ensureCanStart(config: TerminalVoiceConfig): boolean {
+    if (!config.autoStopPrevious && this.state.isActive) {
+      void vscode.window.showInformationMessage(
+        'Terminal Voice: ya hay una lectura en curso. Deténla primero, o activa "autoStopPrevious".',
+      )
+      return false
+    }
+    return true
   }
 
   private notifyWindowsOnly(): void {

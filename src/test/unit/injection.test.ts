@@ -43,4 +43,16 @@ describe('PowerShell injection protection', () => {
     const idx = args.indexOf('-Voice')
     expect(args[idx + 1]).toBe('Microsoft Helena Desktop')
   })
+
+  it('passes the language as a bound argv element', () => {
+    const controllerArgs = buildControllerArgs('s.ps1', {
+      chunks: ['x'],
+      sapiRate: 6,
+      volume: 100,
+      voice: '',
+      language: 'es-ES',
+    })
+    const idx = controllerArgs.indexOf('-Language')
+    expect(controllerArgs[idx + 1]).toBe('es-ES')
+  })
 })

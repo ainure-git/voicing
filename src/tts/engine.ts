@@ -28,6 +28,8 @@ export interface SpeakRequest {
   volume: number
   /** Exact voice name or "" for default. */
   voice: string
+  /** BCP-47 language used to pick a voice by culture when `voice` is empty. */
+  language?: string
 }
 
 export interface TtsEngine {
@@ -93,11 +95,19 @@ export function buildControllerArgs(scriptPath: string, req: SpeakRequest): stri
     String(clampInt(req.volume, 0, 100)),
     '-Voice',
     req.voice ?? '',
+    '-Language',
+    req.language ?? '',
   ]
 }
 
 /** Builds the argv for a one-shot "test voice" run. */
-export function buildTestArgs(scriptPath: string, sapiRate: number, volume: number, voice: string): string[] {
+export function buildTestArgs(
+  scriptPath: string,
+  sapiRate: number,
+  volume: number,
+  voice: string,
+  language = '',
+): string[] {
   return [
     '-NoProfile',
     '-NonInteractive',
@@ -113,6 +123,8 @@ export function buildTestArgs(scriptPath: string, sapiRate: number, volume: numb
     String(clampInt(volume, 0, 100)),
     '-Voice',
     voice ?? '',
+    '-Language',
+    language ?? '',
   ]
 }
 
