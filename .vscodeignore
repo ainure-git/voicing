@@ -1,0 +1,30 @@
+# Source and build tooling — not needed at runtime (we ship the bundled dist/).
+.vscode/**
+.vscode-test/**
+src/**
+out/**
+coverage/**
+node_modules/**
+scripts/**
+distribucion/**
+
+# Config / dev files
+.gitignore
+.eslintrc.json
+jest.config.js
+esbuild.js
+tsconfig.json
+**/tsconfig.json
+**/*.map
+**/*.ts
+!resources/**/*.ps1
+
+# Docs kept in the VSIX: README.md, LICENSE, CAMBIOS.md, PRIVACY.md,
+# TROUBLESHOOTING.md, TECHNICAL_DECISIONS.md, INSTALAR.txt are included.
+**/.DS_Store
+*.log
+.env
+.env.*
+EMPAQUETAR.bat
+INSTALAR_EN_CURSOR.bat
+DESINSTALAR_DE_CURSOR.bat
