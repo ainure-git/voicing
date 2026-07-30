@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado [SemVer](https://semver.org/).
 
+## [0.1.1] — 2026-07-31
+
+### Corregido
+- **Dictado**: el detector de comando ya no coincide por error con el canal de salida de la propia
+  extensión (contenía "voice"). Ahora solo reconoce comandos reales de *dictation/dictate* y excluye
+  los comandos de Output. Si no hay dictado integrado, ofrece `/voice tap`.
+- **Leer selección**: al pulsar el icono de la barra de estado la terminal perdía el foco y
+  `copySelection` (condicionado a `terminalFocus`) no copiaba → "no hay selección". Ahora se re-enfoca
+  la terminal antes de copiar (conservando la selección) y, si aun así no hay selección, se ofrece
+  **Leer portapapeles**. Tiempo de espera de captura ampliado.
+
 ## [0.1.0] — 2026-07-30
 
 Primera versión (MVP).
