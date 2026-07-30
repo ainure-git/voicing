@@ -1,0 +1,55 @@
+========================================
+  TERMINAL VOICE CONTROLS - INSTALACION
+========================================
+
+Para escuchar y dictar texto en la terminal de Cursor.
+Instalacion sencilla (no necesitas conocimientos tecnicos):
+
+1. Abre Cursor.
+
+2. Pulsa a la vez:  Ctrl  +  Mayus (Shift)  +  P
+
+3. Escribe:  Install from VSIX
+   y elige la opcion  "Extensions: Install from VSIX..."
+
+4. Selecciona el archivo:
+       terminal-voice-controls-<version>.vsix
+   (esta en esta misma carpeta)
+
+5. Cuando Cursor lo pida, pulsa  "Reload"  (Recargar).
+
+6. Ya esta instalado. Para probarlo:
+   - Selecciona con el raton un texto dentro de la terminal.
+   - Pulsa el boton del altavoz  (icono de sonido)  en la
+     barra inferior (barra de estado), a la derecha.
+   - O pulsa Ctrl+Shift+P y escribe "Terminal Voice: Leer seleccion".
+
+----------------------------------------
+ SI PREFIERES EL INSTALADOR AUTOMATICO
+----------------------------------------
+Haz doble clic en:  INSTALAR_EN_CURSOR.bat
+(Funciona si tienes el comando "cursor" disponible. Si no,
+ usa los pasos 1-5 de arriba, que siempre funcionan.)
+
+----------------------------------------
+ CONTROLES
+----------------------------------------
+  Altavoz            -> Leer la seleccion de la terminal
+  Pausa / Continuar  -> Pausar o reanudar la lectura
+  Detener            -> Parar la lectura
+  Microfono          -> Dictar
+
+  Tambien: Ctrl+Shift+P y escribe "Terminal Voice".
+
+----------------------------------------
+ VELOCIDAD Y VOZ
+----------------------------------------
+  - Velocidad: Ajustes -> busca "Terminal Voice" -> "rate" (2.0 = doble).
+  - Voz: Ctrl+Shift+P -> "Terminal Voice: Mostrar voces disponibles".
+
+----------------------------------------
+ PRIVACIDAD
+----------------------------------------
+  Todo funciona en tu ordenador. No se envia nada a Internet.
+
+Si algo no funciona, abre TROUBLESHOOTING.md.
