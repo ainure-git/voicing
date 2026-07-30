@@ -14,6 +14,14 @@ import { truncate, chunkText } from './chunk'
 /** Max characters per TTS chunk. Keeps each SpeakAsync call responsive. */
 export const CHUNK_LENGTH = 1200
 
+/**
+ * Slack added to maxCharacters for the pre-pass bound. Cleaning only ever
+ * shrinks text, so pre-slicing the raw input to (max + slack) before the regex
+ * passes guarantees the heavy processing never runs on unbounded input, while
+ * leaving enough margin that the final clean cut still lands at maxCharacters.
+ */
+export const PRE_TRUNCATE_SLACK = 4000
+
 export interface ProcessResult {
   /** The final cleaned text (post-truncation). */
   text: string
@@ -36,7 +44,14 @@ export function collapseWhitespace(input: string): string {
 
 /** Runs the whole cleaning pipeline for a given configuration. */
 export function processText(raw: string, config: TerminalVoiceConfig): ProcessResult {
-  let text = stripAnsi(raw)
+  // Bound the input BEFORE the regex passes so huge pastes never freeze the
+  // extension host. Cleaning can only shrink text, so this cannot cut content
+  // that would otherwise have survived the final truncation.
+  const bound = config.maxCharacters + PRE_TRUNCATE_SLACK
+  const preSliced = raw.length > bound
+  let text = preSliced ? raw.slice(0, bound) : raw
+
+  text = stripAnsi(text)
   text = stripControlChars(text)
   text = stripTerminalDecorations(text)
   text = handleCodeBlocks(text, effectiveCodeBlockMode(config))
@@ -47,5 +62,5 @@ export function processText(raw: string, config: TerminalVoiceConfig): ProcessRe
   const { text: truncated, truncated: wasTruncated } = truncate(text, config.maxCharacters)
   const chunks = chunkText(truncated, CHUNK_LENGTH)
 
-  return { text: truncated, truncated: wasTruncated, chunks }
+  return { text: truncated, truncated: wasTruncated || preSliced, chunks }
 }

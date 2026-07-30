@@ -58,8 +58,17 @@ En **Cursor** y **VS Code** el comportamiento es el mismo (Cursor comparte la ba
 - **Sin manejadores de eventos .NET en PowerShell.** System.Speech lanza eventos en hilos de fondo
   sin *runspace* de PowerShell, lo que **cerraba el proceso con error** (comprobado: exit code 2).
   Solución: el controlador usa un lector de stdin **asíncrono** (`StreamReader.ReadLineAsync`) que se
-  sondea en el hilo principal, y detecta el fin de la cola sondeando `$synth.State`
-  (Speaking → Ready) para emitir `EVT done`.
+  sondea en el hilo principal, y detecta el fin de la cola sondeando `$synth.State`. Para emitir
+  `EVT done` se exige una **racha** de estados `Ready` sostenida (≈200 ms) tras un `SPEAK`, de modo que
+  incluso una locución más corta que un ciclo de sondeo se reporta como completada y una locución que
+  aún no ha arrancado (brevemente `Ready`) no se marca como terminada prematuramente.
+- **Selección de voz por idioma.** Si `voice` está vacío, el script elige la primera voz instalada cuya
+  cultura coincide con `language` (exacta y luego por prefijo, p. ej. `es`); si no hay coincidencia usa
+  la voz predeterminada de SAPI.
+- **`autoStopPrevious`.** Si está desactivado y ya hay una lectura activa, una nueva lectura se rechaza
+  con aviso (en vez de interrumpir), única forma de honrar el ajuste con un solo proceso de voz.
+- **Truncado temprano.** El texto se acota a `maxCharacters` (+ margen) **antes** de las pasadas de
+  regex, para que un pegado enorme nunca congele el *extension host*.
 - **Pausa/reanudación reales** con `Pause()`/`Resume()` sobre `SpeakAsync`.
 - **Detención fiable** con `SpeakAsyncCancelAll()` + cierre del proceso; el host mata además el árbol
   de procesos con `taskkill /T /F` para no dejar procesos huérfanos.
@@ -102,7 +111,7 @@ Separación por responsabilidades (TypeScript estricto, sin `any`):
 - No se afirma compatibilidad no probada.
 
 ## 9. Pruebas
-91 pruebas unitarias (Jest + ts-jest) cubriendo limpieza ANSI/control, Markdown, bloques de código,
+96 pruebas unitarias (Jest + ts-jest) cubriendo limpieza ANSI/control, Markdown, bloques de código,
 truncado y fragmentación, conversión de velocidad, validación de configuración, protección de
 inyección, restauración del portapapeles (mocks), máquina de estados y ciclo de vida/cancelación del
 motor TTS (spawn simulado). Más pruebas de compilación, lint y empaquetado. Smoke test manual del

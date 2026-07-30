@@ -47,6 +47,18 @@ describe('processText (integration)', () => {
     expect(text.length).toBeLessThanOrEqual(1100)
   })
 
+  it('bounds huge input quickly (early truncation) and flags it', () => {
+    const config = validateConfig({ maxCharacters: 1000 })
+    const raw = 'palabra '.repeat(100_000) // ~800k chars
+    const start = Date.now()
+    const { truncated, text } = processText(raw, config)
+    const elapsed = Date.now() - start
+    expect(truncated).toBe(true)
+    expect(text.length).toBeLessThanOrEqual(1100)
+    // The regex passes must run on the bounded slice, not 800k chars.
+    expect(elapsed).toBeLessThan(1000)
+  })
+
   it('produces no chunks for empty/decoration-only input', () => {
     const config = validateConfig({})
     const { chunks } = processText('   \n\n  ', config)

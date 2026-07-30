@@ -10,10 +10,12 @@ type Listener = (status: PlaybackStatus, previous: PlaybackStatus) => void
 const ALLOWED: Record<PlaybackStatus, readonly PlaybackStatus[]> = {
   idle: ['preparing', 'playing', 'error'],
   preparing: ['playing', 'stopped', 'error', 'idle'],
-  playing: ['paused', 'stopped', 'error', 'idle'],
-  paused: ['playing', 'stopped', 'error', 'idle'],
+  // A new read while one is active moves back to "preparing".
+  playing: ['preparing', 'paused', 'stopped', 'error', 'idle'],
+  paused: ['preparing', 'playing', 'stopped', 'error', 'idle'],
   stopped: ['idle', 'preparing', 'playing'],
-  error: ['idle', 'preparing', 'playing'],
+  // Stop must be reachable after an error so the status bar clears.
+  error: ['idle', 'preparing', 'playing', 'stopped'],
 }
 
 export class PlaybackState {

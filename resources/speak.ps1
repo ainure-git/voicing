@@ -38,7 +38,9 @@ param(
     [ValidateRange(0, 100)]
     [int]$Volume = 100,
 
-    [string]$Voice = ''
+    [string]$Voice = '',
+
+    [string]$Language = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -55,19 +57,46 @@ function New-Synth {
     param(
         [int]$Rate,
         [int]$Volume,
-        [string]$Voice
+        [string]$Voice,
+        [string]$Language
     )
     $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
     $synth.Rate = $Rate
     $synth.Volume = $Volume
+
+    $selected = $false
     if ($Voice -ne '') {
         try {
             $synth.SelectVoice($Voice)
+            $selected = $true
         }
         catch {
             [Console]::Out.WriteLine('WARN voice-not-found')
         }
     }
+
+    # When no explicit voice is chosen, honour the preferred language by picking
+    # the first installed voice whose culture matches (exact, then prefix).
+    if (-not $selected -and $Language -ne '') {
+        try {
+            $match = $synth.GetInstalledVoices() |
+                Where-Object { $_.Enabled -and $_.VoiceInfo.Culture.Name -eq $Language } |
+                Select-Object -First 1
+            if (-not $match) {
+                $prefix = $Language.Split('-')[0]
+                $match = $synth.GetInstalledVoices() |
+                    Where-Object { $_.Enabled -and $_.VoiceInfo.Culture.Name.StartsWith($prefix) } |
+                    Select-Object -First 1
+            }
+            if ($match) {
+                $synth.SelectVoice($match.VoiceInfo.Name)
+            }
+        }
+        catch {
+            # Fall back to the SAPI default voice.
+        }
+    }
+
     return $synth
 }
 
@@ -86,14 +115,14 @@ switch ($Mode) {
     }
 
     'test' {
-        $synth = New-Synth -Rate $Rate -Volume $Volume -Voice $Voice
+        $synth = New-Synth -Rate $Rate -Volume $Volume -Voice $Voice -Language $Language
         $synth.Speak('Hola. Esta es una prueba de la voz de Terminal Voice Controls.')
         $synth.Dispose()
         exit 0
     }
 
     'controller' {
-        $synth = New-Synth -Rate $Rate -Volume $Volume -Voice $Voice
+        $synth = New-Synth -Rate $Rate -Volume $Volume -Voice $Voice -Language $Language
 
         # Truly-async stdin reader (StreamReader over the raw stdin stream) so we
         # can poll for commands without blocking the main thread, leaving it free
@@ -103,7 +132,14 @@ switch ($Mode) {
 
         [Console]::Out.WriteLine('READY')
 
-        $observedSpeaking = $false
+        # Completion is detected by watching the synthesizer state. `$pending`
+        # marks that a SPEAK is outstanding; `$readyStreak` counts consecutive
+        # Ready polls so that even an utterance shorter than one poll interval is
+        # eventually reported done (and speech that has not started yet, briefly
+        # Ready, is not reported prematurely).
+        $pending = $false
+        $readyStreak = 0
+        $readyThreshold = 5
         $running = $true
 
         while ($running) {
@@ -131,6 +167,8 @@ switch ($Mode) {
                                 $bytes = [Convert]::FromBase64String($argument)
                                 $text = [System.Text.Encoding]::UTF8.GetString($bytes)
                                 $synth.SpeakAsync($text) | Out-Null
+                                $pending = $true
+                                $readyStreak = 0
                             }
                             catch {
                                 [Console]::Out.WriteLine('WARN bad-speak')
@@ -139,7 +177,8 @@ switch ($Mode) {
                         'PAUSE' { try { $synth.Pause() } catch { } }
                         'RESUME' { try { $synth.Resume() } catch { } }
                         'STOP' {
-                            $observedSpeaking = $false
+                            $pending = $false
+                            $readyStreak = 0
                             try { $synth.Resume() } catch { }
                             try { $synth.SpeakAsyncCancelAll() } catch { }
                         }
@@ -150,15 +189,25 @@ switch ($Mode) {
                 continue                        # process pending input promptly
             }
 
-            # Completion detection: once we have seen the synth speaking, a return
-            # to the Ready state means the whole queue drained.
-            $state = $synth.State.ToString()
-            if ($state -eq 'Speaking') {
-                $observedSpeaking = $true
-            }
-            elseif ($observedSpeaking -and $state -eq 'Ready') {
-                $observedSpeaking = $false
-                [Console]::Out.WriteLine('EVT done')
+            # Completion detection: while a SPEAK is pending, Speaking resets the
+            # streak; sustained Ready (queue drained) reports done once.
+            if ($pending) {
+                $state = $synth.State.ToString()
+                if ($state -eq 'Speaking') {
+                    $readyStreak = 0
+                }
+                elseif ($state -eq 'Ready') {
+                    $readyStreak++
+                    if ($readyStreak -ge $readyThreshold) {
+                        $pending = $false
+                        $readyStreak = 0
+                        [Console]::Out.WriteLine('EVT done')
+                    }
+                }
+                else {
+                    # Paused (or transitioning): do not accumulate.
+                    $readyStreak = 0
+                }
             }
 
             Start-Sleep -Milliseconds 40
