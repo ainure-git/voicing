@@ -19,7 +19,22 @@ describe('pickDictationCommand', () => {
     expect(pickDictationCommand(cmds)).toBe('workbench.action.startDictation')
   })
 
-  it('matches voice-based command ids', () => {
-    expect(pickDictationCommand(['some.voice.command'])).toBe('some.voice.command')
+  it('does NOT match the extension\'s own output-channel command (regression)', () => {
+    const cmds = [
+      'workbench.action.output.show.extension-output-eureka-local.terminal-voice-controls-#1-Terminal Voice Controls.workspaceId-ff820e5a',
+      'terminalVoice.dictate',
+      'terminalVoice.readSelection',
+    ]
+    expect(pickDictationCommand(cmds)).toBeUndefined()
+  })
+
+  it('does not match a bare "voice" command that is not dictation', () => {
+    expect(pickDictationCommand(['workbench.action.startVoiceChat'])).toBeUndefined()
+  })
+
+  it('still matches real editor/terminal dictation commands', () => {
+    expect(pickDictationCommand(['workbench.action.editorDictation.start'])).toBe(
+      'workbench.action.editorDictation.start',
+    )
   })
 })

@@ -70,6 +70,7 @@ export class TerminalVoiceController {
     try {
       const result = await captureTerminalSelection(createSelectionDeps(copyCommand), {
         restoreClipboard: config.restoreClipboard,
+        timeoutMs: 2500,
       })
       captured = result.text
     } catch (err) {
@@ -79,9 +80,18 @@ export class TerminalVoiceController {
       return
     }
 
+    // Diagnostics only ever record the length, never the content.
+    this.logger.debug(`selection capture via "${copyCommand}": ${captured ? `${captured.length} chars` : 'none'}`)
+
     if (!captured) {
       this.updateStatus('idle')
-      void vscode.window.showInformationMessage('Terminal Voice: selecciona texto de la terminal antes de reproducirlo.')
+      const choice = await vscode.window.showInformationMessage(
+        'Terminal Voice: no detecté selección en la terminal. Si seleccionaste texto, cópialo con Ctrl+C y pulsa "Leer portapapeles".',
+        'Leer portapapeles',
+      )
+      if (choice === 'Leer portapapeles') {
+        await this.readClipboard()
+      }
       return
     }
 
