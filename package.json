@@ -1,0 +1,229 @@
+{
+  "name": "terminal-voice-controls",
+  "displayName": "Terminal Voice Controls",
+  "description": "Dicta y escucha texto de la terminal integrada (lectura a ~x2, pausa/detención, voz local de Windows). Sin nube, sin telemetría.",
+  "version": "0.1.0",
+  "publisher": "eureka-local",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "terminal",
+    "tts",
+    "text-to-speech",
+    "voz",
+    "accesibilidad",
+    "dictado"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "terminalVoice.dictate",
+        "title": "Terminal Voice: Dictar",
+        "category": "Terminal Voice",
+        "icon": "$(mic)"
+      },
+      {
+        "command": "terminalVoice.readSelection",
+        "title": "Terminal Voice: Leer selección",
+        "category": "Terminal Voice",
+        "icon": "$(unmute)"
+      },
+      {
+        "command": "terminalVoice.readClipboard",
+        "title": "Terminal Voice: Leer portapapeles",
+        "category": "Terminal Voice",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "terminalVoice.pauseResume",
+        "title": "Terminal Voice: Pausar o reanudar",
+        "category": "Terminal Voice",
+        "icon": "$(debug-pause)"
+      },
+      {
+        "command": "terminalVoice.stop",
+        "title": "Terminal Voice: Detener",
+        "category": "Terminal Voice",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "terminalVoice.testVoice",
+        "title": "Terminal Voice: Probar voz",
+        "category": "Terminal Voice"
+      },
+      {
+        "command": "terminalVoice.listVoices",
+        "title": "Terminal Voice: Mostrar voces disponibles",
+        "category": "Terminal Voice"
+      },
+      {
+        "command": "terminalVoice.openSettings",
+        "title": "Terminal Voice: Abrir configuración",
+        "category": "Terminal Voice",
+        "icon": "$(gear)"
+      }
+    ],
+    "menus": {
+      "terminal/context": [
+        {
+          "command": "terminalVoice.readSelection",
+          "group": "navigation@1"
+        },
+        {
+          "command": "terminalVoice.pauseResume",
+          "group": "navigation@2"
+        },
+        {
+          "command": "terminalVoice.stop",
+          "group": "navigation@3"
+        },
+        {
+          "command": "terminalVoice.dictate",
+          "group": "navigation@4"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "terminalVoice.dictate"
+        },
+        {
+          "command": "terminalVoice.readSelection"
+        },
+        {
+          "command": "terminalVoice.readClipboard"
+        },
+        {
+          "command": "terminalVoice.pauseResume"
+        },
+        {
+          "command": "terminalVoice.stop"
+        },
+        {
+          "command": "terminalVoice.testVoice"
+        },
+        {
+          "command": "terminalVoice.listVoices"
+        },
+        {
+          "command": "terminalVoice.openSettings"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Terminal Voice Controls",
+      "properties": {
+        "terminalVoice.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Activa la extensión y sus controles. / Enables the extension and its controls."
+        },
+        "terminalVoice.language": {
+          "type": "string",
+          "default": "es-ES",
+          "description": "Idioma preferido para la voz (BCP-47), p. ej. es-ES. Se usa para elegir voz si no se fija una concreta. / Preferred voice language (BCP-47), e.g. es-ES. Used to pick a voice when none is fixed."
+        },
+        "terminalVoice.rate": {
+          "type": "number",
+          "default": 2.0,
+          "minimum": 0.5,
+          "maximum": 3.0,
+          "description": "Multiplicador de velocidad de lectura (0.5–3.0). 2.0 ≈ doble de velocidad. / Reading speed multiplier (0.5–3.0). 2.0 ≈ double speed."
+        },
+        "terminalVoice.volume": {
+          "type": "number",
+          "default": 100,
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Volumen de la voz (0–100). / Voice volume (0–100)."
+        },
+        "terminalVoice.voice": {
+          "type": "string",
+          "default": "",
+          "description": "Nombre exacto de la voz instalada a usar. Vacío = voz predeterminada del idioma. Usa \"Mostrar voces disponibles\". / Exact installed voice name. Empty = default voice for the language. Use \"Show available voices\"."
+        },
+        "terminalVoice.skipCodeBlocks": {
+          "type": "boolean",
+          "default": true,
+          "description": "Si es falso, los bloques de código se leen completos (equivale a codeBlockMode=read). Si es verdadero, se aplica codeBlockMode. / If false, code blocks are read in full (equals codeBlockMode=read). If true, codeBlockMode applies."
+        },
+        "terminalVoice.codeBlockMode": {
+          "type": "string",
+          "enum": [
+            "skip",
+            "announce",
+            "read"
+          ],
+          "enumDescriptions": [
+            "Omitir por completo los bloques de código. / Skip code blocks entirely.",
+            "Anunciar \"Bloque de código omitido\". / Announce \"Code block skipped\".",
+            "Leer el bloque de código completo. / Read the full code block."
+          ],
+          "default": "announce",
+          "description": "Qué hacer con los bloques de código (se ignora si skipCodeBlocks=false). / What to do with code blocks (ignored when skipCodeBlocks=false)."
+        },
+        "terminalVoice.maxCharacters": {
+          "type": "number",
+          "default": 30000,
+          "minimum": 1000,
+          "maximum": 200000,
+          "description": "Número máximo de caracteres a leer. El resto se trunca con aviso. / Maximum characters to read. The rest is truncated with a notice."
+        },
+        "terminalVoice.restoreClipboard": {
+          "type": "boolean",
+          "default": true,
+          "description": "Restaura el contenido previo del portapapeles tras leer la selección. / Restores previous clipboard content after reading the selection."
+        },
+        "terminalVoice.showStatusBarControls": {
+          "type": "boolean",
+          "default": true,
+          "description": "Muestra controles discretos en la barra de estado. / Shows discreet controls in the status bar."
+        },
+        "terminalVoice.autoStopPrevious": {
+          "type": "boolean",
+          "default": true,
+          "description": "Si empieza una nueva lectura, detiene limpiamente la anterior. / When a new reading starts, cleanly stops the previous one."
+        },
+        "terminalVoice.debugLogging": {
+          "type": "boolean",
+          "default": false,
+          "description": "Registra diagnóstico en el canal de salida (nunca el texto leído). / Logs diagnostics to the output channel (never the read text)."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "clean": "rimraf dist out *.vsix",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "jest",
+    "pretest": "npm run typecheck && npm run lint",
+    "package:vsix": "npm run compile && vsce package --no-dependencies",
+    "distribution": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/distribution.ps1",
+    "release:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/release.ps1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
+    "@vscode/vsce": "^2.26.0",
+    "esbuild": "^0.20.2",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.4.5"
+  }
+}
