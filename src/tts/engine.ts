@@ -19,16 +19,17 @@
 
 import { PlaybackStatus } from '../types'
 import { toBase64Utf8 } from './encoding'
+import { multiplierToSapiRate } from './rate'
 
 export interface SpeakRequest {
   chunks: string[]
-  /** SAPI rate in [-10, 10]. */
-  sapiRate: number
+  /** Speed multiplier in [0.5, 3.0]; each engine maps it to its own scale. */
+  rate: number
   /** Volume in [0, 100]. */
   volume: number
   /** Exact voice name or "" for default. */
   voice: string
-  /** BCP-47 language used to pick a voice by culture when `voice` is empty. */
+  /** BCP-47 language used to pick a voice by culture/language when `voice` is empty. */
   language?: string
 }
 
@@ -59,6 +60,7 @@ export type SpawnFn = (command: string, args: string[]) => TtsChildProcess
 
 export interface EngineLogger {
   debug(message: string): void
+  info(message: string): void
   warn(message: string): void
   error(message: string): void
 }
@@ -90,7 +92,7 @@ export function buildControllerArgs(scriptPath: string, req: SpeakRequest): stri
     '-Mode',
     'controller',
     '-Rate',
-    String(clampInt(req.sapiRate, -10, 10)),
+    String(multiplierToSapiRate(req.rate)),
     '-Volume',
     String(clampInt(req.volume, 0, 100)),
     '-Voice',
@@ -103,7 +105,7 @@ export function buildControllerArgs(scriptPath: string, req: SpeakRequest): stri
 /** Builds the argv for a one-shot "test voice" run. */
 export function buildTestArgs(
   scriptPath: string,
-  sapiRate: number,
+  rate: number,
   volume: number,
   voice: string,
   language = '',
@@ -118,7 +120,7 @@ export function buildTestArgs(
     '-Mode',
     'test',
     '-Rate',
-    String(clampInt(sapiRate, -10, 10)),
+    String(multiplierToSapiRate(rate)),
     '-Volume',
     String(clampInt(volume, 0, 100)),
     '-Voice',

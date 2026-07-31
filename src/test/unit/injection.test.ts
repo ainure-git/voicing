@@ -23,14 +23,14 @@ describe('PowerShell injection protection', () => {
   })
 
   it('never places raw text on the controller command line', () => {
-    const req = { chunks: ['irrelevant'], sapiRate: 6, volume: 100, voice: 'Any Voice' }
+    const req = { chunks: ['irrelevant'], rate: 6, volume: 100, voice: 'Any Voice' }
     const args = buildControllerArgs('C:\\ext\\speak.ps1', req)
     // Text is delivered over stdin, so no chunk text appears in argv.
     expect(args.join(' ')).not.toContain('irrelevant')
   })
 
   it('clamps numeric args and keeps them numeric', () => {
-    const args = buildControllerArgs('s.ps1', { chunks: ['x'], sapiRate: 999, volume: -50, voice: '' })
+    const args = buildControllerArgs('s.ps1', { chunks: ['x'], rate: 999, volume: -50, voice: '' })
     const rate = args[args.indexOf('-Rate') + 1]
     const volume = args[args.indexOf('-Volume') + 1]
     expect(rate).toBe('10')
@@ -47,7 +47,7 @@ describe('PowerShell injection protection', () => {
   it('passes the language as a bound argv element', () => {
     const controllerArgs = buildControllerArgs('s.ps1', {
       chunks: ['x'],
-      sapiRate: 6,
+      rate: 6,
       volume: 100,
       voice: '',
       language: 'es-ES',

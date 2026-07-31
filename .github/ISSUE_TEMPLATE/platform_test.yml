@@ -1,0 +1,35 @@
+name: "🧪 Platform test report (macOS / Linux)"
+description: Help verify the experimental macOS/Linux voice engines
+labels: [platform-test]
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for testing! The POSIX engines are unit-tested but not yet verified on real hardware."
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [macOS, "Linux (espeak-ng)", "Linux (espeak)", "Linux (spd-say)", Other]
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: OS / distro version
+      placeholder: "macOS 15.1 / Ubuntu 24.04 ..."
+  - type: checkboxes
+    id: results
+    attributes:
+      label: What worked?
+      options:
+        - label: Read selection / clipboard
+        - label: Stop
+        - label: Pause / resume
+        - label: Speed (rate) change
+        - label: Voice selection (Show available voices)
+        - label: No orphaned voice processes after closing/reloading
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes / problems
+      description: Anything unexpected, error messages, or the "Voicing" Output channel with `voicing.debugLogging` on.

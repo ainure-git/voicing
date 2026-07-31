@@ -1,0 +1,18 @@
+# Default: normalize text to LF in the repo.
+* text=auto eol=lf
+
+# Shell scripts MUST be LF (CRLF breaks the shebang/interpreter on macOS/Linux).
+*.sh text eol=lf
+
+# Windows batch files need CRLF.
+*.bat text eol=crlf
+
+# PowerShell is fine with LF; keep it consistent.
+*.ps1 text eol=lf
+
+# Binary assets — never touch line endings.
+*.png binary
+*.jpg binary
+*.ico binary
+*.vsix binary
+*.gif binary

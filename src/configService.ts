@@ -7,7 +7,7 @@ import * as vscode from 'vscode'
 import { validateConfig } from './config'
 import { TerminalVoiceConfig } from './types'
 
-export const CONFIG_SECTION = 'terminalVoice'
+export const CONFIG_SECTION = 'voicing'
 
 export function readConfig(): TerminalVoiceConfig {
   const c = vscode.workspace.getConfiguration(CONFIG_SECTION)

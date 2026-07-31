@@ -129,14 +129,14 @@ export function listInstalledVoices(powershellPath: string, scriptPath: string):
 export function speakTest(
   powershellPath: string,
   scriptPath: string,
-  sapiRate: number,
+  rate: number,
   volume: number,
   voice: string,
   language = '',
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = track(
-      nodeSpawn(powershellPath, buildTestArgs(scriptPath, sapiRate, volume, voice, language), {
+      nodeSpawn(powershellPath, buildTestArgs(scriptPath, rate, volume, voice, language), {
         windowsHide: true,
         stdio: ['ignore', 'pipe', 'pipe'],
       }),

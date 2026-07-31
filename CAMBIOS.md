@@ -2,6 +2,28 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado [SemVer](https://semver.org/).
 
+## [0.1.3] — 2026-07-31
+
+### Añadido
+- **Multiplataforma:** motores de voz para **macOS** (`say`) y **Linux**
+  (`espeak-ng` / `espeak`, con `spd-say` como alternativa), sobre la misma interfaz
+  `TtsEngine`. Lectura, parada, velocidad y voz; pausa/reanudación vía
+  `SIGSTOP`/`SIGCONT` en los motores que reproducen en proceso. *Experimental:
+  implementado y con pruebas unitarias, pendiente de verificación en hardware real.*
+- **Selección de voz por idioma** también en macOS/Linux; listado de voces (`say -v ?`,
+  `espeak --voices`).
+- **Instaladores de una línea** multi-IDE (`scripts/install.sh`, `scripts/install.ps1`):
+  detectan VS Code, Cursor, Windsurf, VSCodium… e instalan la última release.
+- **CI y Release** con GitHub Actions (pruebas + build del `.vsix` y publicación en Releases;
+  Open VSX opcional).
+- Repo público: README con imagen, insignias y matriz de instalación; CONTRIBUTING,
+  SECURITY, CODE_OF_CONDUCT, plantillas de issues/PR; icono y banner.
+
+### Cambiado
+- **Renombrado a “Voicing”** (`ainure.voicing`). Comandos y ajustes bajo el espacio
+  `voicing.*`. La velocidad se pasa como multiplicador y cada plataforma la convierte a su escala.
+- 110 pruebas unitarias (añadidas las de los motores POSIX y builders de argumentos).
+
 ## [0.1.2] — 2026-07-31
 
 ### Corregido

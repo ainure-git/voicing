@@ -1,23 +1,41 @@
 {
-  "name": "terminal-voice-controls",
-  "displayName": "Terminal Voice Controls",
-  "description": "Dicta y escucha texto de la terminal integrada (lectura a ~x2, pausa/detención, voz local de Windows). Sin nube, sin telemetría.",
-  "version": "0.1.2",
-  "publisher": "eureka-local",
+  "name": "voicing",
+  "displayName": "Voicing",
+  "description": "Listen to your terminal and dictate into it. Select any terminal output and hear it read aloud (~2x, pause/stop) with your OS's local voice. Local-only: no cloud, no API keys, no telemetry.",
+  "version": "0.1.3",
+  "publisher": "ainure",
   "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ainure-git/voicing.git"
+  },
+  "homepage": "https://github.com/ainure-git/voicing#readme",
+  "bugs": {
+    "url": "https://github.com/ainure-git/voicing/issues"
+  },
+  "galleryBanner": {
+    "color": "#0B1021",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Visualization"
   ],
   "keywords": [
     "terminal",
     "tts",
     "text-to-speech",
-    "voz",
-    "accesibilidad",
-    "dictado"
+    "read aloud",
+    "accessibility",
+    "dictation",
+    "voice",
+    "screen reader",
+    "claude code",
+    "codex"
   ],
   "main": "./dist/extension.js",
   "activationEvents": [
@@ -26,136 +44,136 @@
   "contributes": {
     "commands": [
       {
-        "command": "terminalVoice.dictate",
-        "title": "Terminal Voice: Dictar",
-        "category": "Terminal Voice",
+        "command": "voicing.dictate",
+        "title": "Voicing: Dictar",
+        "category": "Voicing",
         "icon": "$(mic)"
       },
       {
-        "command": "terminalVoice.readSelection",
-        "title": "Terminal Voice: Leer selección",
-        "category": "Terminal Voice",
+        "command": "voicing.readSelection",
+        "title": "Voicing: Leer selección",
+        "category": "Voicing",
         "icon": "$(unmute)"
       },
       {
-        "command": "terminalVoice.readClipboard",
-        "title": "Terminal Voice: Leer portapapeles",
-        "category": "Terminal Voice",
+        "command": "voicing.readClipboard",
+        "title": "Voicing: Leer portapapeles",
+        "category": "Voicing",
         "icon": "$(clippy)"
       },
       {
-        "command": "terminalVoice.pauseResume",
-        "title": "Terminal Voice: Pausar o reanudar",
-        "category": "Terminal Voice",
+        "command": "voicing.pauseResume",
+        "title": "Voicing: Pausar o reanudar",
+        "category": "Voicing",
         "icon": "$(debug-pause)"
       },
       {
-        "command": "terminalVoice.stop",
-        "title": "Terminal Voice: Detener",
-        "category": "Terminal Voice",
+        "command": "voicing.stop",
+        "title": "Voicing: Detener",
+        "category": "Voicing",
         "icon": "$(debug-stop)"
       },
       {
-        "command": "terminalVoice.testVoice",
-        "title": "Terminal Voice: Probar voz",
-        "category": "Terminal Voice"
+        "command": "voicing.testVoice",
+        "title": "Voicing: Probar voz",
+        "category": "Voicing"
       },
       {
-        "command": "terminalVoice.listVoices",
-        "title": "Terminal Voice: Mostrar voces disponibles",
-        "category": "Terminal Voice"
+        "command": "voicing.listVoices",
+        "title": "Voicing: Mostrar voces disponibles",
+        "category": "Voicing"
       },
       {
-        "command": "terminalVoice.openSettings",
-        "title": "Terminal Voice: Abrir configuración",
-        "category": "Terminal Voice",
+        "command": "voicing.openSettings",
+        "title": "Voicing: Abrir configuración",
+        "category": "Voicing",
         "icon": "$(gear)"
       }
     ],
     "menus": {
       "terminal/context": [
         {
-          "command": "terminalVoice.readSelection",
+          "command": "voicing.readSelection",
           "group": "navigation@1"
         },
         {
-          "command": "terminalVoice.pauseResume",
+          "command": "voicing.pauseResume",
           "group": "navigation@2"
         },
         {
-          "command": "terminalVoice.stop",
+          "command": "voicing.stop",
           "group": "navigation@3"
         },
         {
-          "command": "terminalVoice.dictate",
+          "command": "voicing.dictate",
           "group": "navigation@4"
         }
       ],
       "commandPalette": [
         {
-          "command": "terminalVoice.dictate"
+          "command": "voicing.dictate"
         },
         {
-          "command": "terminalVoice.readSelection"
+          "command": "voicing.readSelection"
         },
         {
-          "command": "terminalVoice.readClipboard"
+          "command": "voicing.readClipboard"
         },
         {
-          "command": "terminalVoice.pauseResume"
+          "command": "voicing.pauseResume"
         },
         {
-          "command": "terminalVoice.stop"
+          "command": "voicing.stop"
         },
         {
-          "command": "terminalVoice.testVoice"
+          "command": "voicing.testVoice"
         },
         {
-          "command": "terminalVoice.listVoices"
+          "command": "voicing.listVoices"
         },
         {
-          "command": "terminalVoice.openSettings"
+          "command": "voicing.openSettings"
         }
       ]
     },
     "configuration": {
-      "title": "Terminal Voice Controls",
+      "title": "Voicing",
       "properties": {
-        "terminalVoice.enabled": {
+        "voicing.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Activa la extensión y sus controles. / Enables the extension and its controls."
         },
-        "terminalVoice.language": {
+        "voicing.language": {
           "type": "string",
           "default": "es-ES",
           "description": "Idioma preferido para la voz (BCP-47), p. ej. es-ES. Se usa para elegir voz si no se fija una concreta. / Preferred voice language (BCP-47), e.g. es-ES. Used to pick a voice when none is fixed."
         },
-        "terminalVoice.rate": {
+        "voicing.rate": {
           "type": "number",
           "default": 2.0,
           "minimum": 0.5,
           "maximum": 3.0,
           "description": "Multiplicador de velocidad de lectura (0.5–3.0). 2.0 ≈ doble de velocidad. / Reading speed multiplier (0.5–3.0). 2.0 ≈ double speed."
         },
-        "terminalVoice.volume": {
+        "voicing.volume": {
           "type": "number",
           "default": 100,
           "minimum": 0,
           "maximum": 100,
           "description": "Volumen de la voz (0–100). / Voice volume (0–100)."
         },
-        "terminalVoice.voice": {
+        "voicing.voice": {
           "type": "string",
           "default": "",
           "description": "Nombre exacto de la voz instalada a usar. Vacío = voz predeterminada del idioma. Usa \"Mostrar voces disponibles\". / Exact installed voice name. Empty = default voice for the language. Use \"Show available voices\"."
         },
-        "terminalVoice.skipCodeBlocks": {
+        "voicing.skipCodeBlocks": {
           "type": "boolean",
           "default": true,
           "description": "Si es falso, los bloques de código se leen completos (equivale a codeBlockMode=read). Si es verdadero, se aplica codeBlockMode. / If false, code blocks are read in full (equals codeBlockMode=read). If true, codeBlockMode applies."
         },
-        "terminalVoice.codeBlockMode": {
+        "voicing.codeBlockMode": {
           "type": "string",
           "enum": [
             "skip",
@@ -170,29 +188,29 @@
           "default": "announce",
           "description": "Qué hacer con los bloques de código (se ignora si skipCodeBlocks=false). / What to do with code blocks (ignored when skipCodeBlocks=false)."
         },
-        "terminalVoice.maxCharacters": {
+        "voicing.maxCharacters": {
           "type": "number",
           "default": 30000,
           "minimum": 1000,
           "maximum": 200000,
           "description": "Número máximo de caracteres a leer. El resto se trunca con aviso. / Maximum characters to read. The rest is truncated with a notice."
         },
-        "terminalVoice.restoreClipboard": {
+        "voicing.restoreClipboard": {
           "type": "boolean",
           "default": true,
           "description": "Restaura el contenido previo del portapapeles tras leer la selección. / Restores previous clipboard content after reading the selection."
         },
-        "terminalVoice.showStatusBarControls": {
+        "voicing.showStatusBarControls": {
           "type": "boolean",
           "default": true,
           "description": "Muestra controles discretos en la barra de estado. / Shows discreet controls in the status bar."
         },
-        "terminalVoice.autoStopPrevious": {
+        "voicing.autoStopPrevious": {
           "type": "boolean",
           "default": true,
           "description": "Si empieza una nueva lectura, detiene limpiamente la anterior. / When a new reading starts, cleanly stops the previous one."
         },
-        "terminalVoice.debugLogging": {
+        "voicing.debugLogging": {
           "type": "boolean",
           "default": false,
           "description": "Registra diagnóstico en el canal de salida (nunca el texto leído). / Logs diagnostics to the output channel (never the read text)."

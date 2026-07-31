@@ -1,19 +1,19 @@
 @echo off
 setlocal enabledelayedexpansion
-title Instalar Terminal Voice Controls en Cursor
+title Instalar Voicing en Cursor
 
 echo ==========================================================
-echo   Instalar Terminal Voice Controls en Cursor
+echo   Instalar Voicing en Cursor
 echo ==========================================================
 echo.
 
 rem --- Buscar el .vsix en esta misma carpeta (rutas relativas) ---
 set "VSIX="
-for %%F in ("%~dp0terminal-voice-controls-*.vsix") do set "VSIX=%%~fF"
+for %%F in ("%~dp0voicing-*.vsix") do set "VSIX=%%~fF"
 
 if not defined VSIX (
   echo No se encontro ningun archivo .vsix en esta carpeta.
-  echo Asegurate de tener "terminal-voice-controls-<version>.vsix" junto a este .bat.
+  echo Asegurate de tener "voicing-<version>.vsix" junto a este .bat.
   echo.
   pause
   exit /b 1

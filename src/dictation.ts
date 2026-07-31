@@ -26,6 +26,7 @@ export function pickDictationCommand(commandIds: readonly string[]): string | un
     if (
       lower.includes('.output.') ||
       lower.includes('extension-output') ||
+      lower.includes('voicing') ||
       lower.includes('terminalvoice') ||
       lower.includes('terminal-voice')
     ) {

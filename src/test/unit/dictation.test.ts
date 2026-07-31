@@ -23,8 +23,8 @@ describe('pickDictationCommand', () => {
   it("does NOT match the extension's own output-channel command (regression)", () => {
     const cmds = [
       'workbench.action.output.show.extension-output-eureka-local.terminal-voice-controls-#1-Terminal Voice Controls.workspaceId-ff820e5a',
-      'terminalVoice.dictate',
-      'terminalVoice.readSelection',
+      'voicing.dictate',
+      'voicing.readSelection',
     ]
     expect(pickDictationCommand(cmds)).toBeUndefined()
   })

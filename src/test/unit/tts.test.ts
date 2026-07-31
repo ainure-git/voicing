@@ -77,7 +77,7 @@ function setup(): Setup {
   return { engine, children, killed, statuses }
 }
 
-const req = (chunks: string[]) => ({ chunks, sapiRate: 6, volume: 100, voice: '' })
+const req = (chunks: string[]) => ({ chunks, rate: 6, volume: 100, voice: '' })
 
 describe('WindowsTtsEngine lifecycle', () => {
   it('spawns a process, sends SPEAK per chunk and goes playing', async () => {

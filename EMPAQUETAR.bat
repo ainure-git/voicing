@@ -1,8 +1,8 @@
 @echo off
-title Empaquetar Terminal Voice Controls (build + test + vsix + distribucion)
+title Empaquetar Voicing (build + test + vsix + distribucion)
 
 echo ==========================================================
-echo   Terminal Voice Controls - EMPAQUETAR
+echo   Voicing - EMPAQUETAR
 echo   (comprueba, prueba, compila, empaqueta y distribuye)
 echo ==========================================================
 echo.

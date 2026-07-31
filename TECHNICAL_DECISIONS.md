@@ -100,6 +100,23 @@ Separación por responsabilidades (TypeScript estricto, sin `any`):
 `tts/{engine,rate,encoding,windowsRuntime,factory,unsupported}` · `dictation` · `controller` ·
 `extension`. La lógica pura no importa `vscode` para ser testeable en Jest.
 
+## 7b. Motores multiplataforma (macOS / Linux)
+Interfaz común `TtsEngine`; el `factory` elige el motor según `process.platform`.
+- **macOS:** `say`. Texto por **stdin**. Velocidad `-r` en palabras/min (`180 × mult`,
+  acotado 90–720). Voz `-v`. Pausa/reanudación con `SIGSTOP`/`SIGCONT` (say reproduce en proceso).
+- **Linux:** preferimos `espeak-ng`/`espeak` (reproducen en proceso → pausa por señales).
+  Texto por **stdin** (`--stdin`). Velocidad `-s` palabras/min (`175 × mult`, 80–600),
+  volumen `-a` 0–200, voz/idioma `-v`. Alternativa `spd-say` (cliente del daemon
+  speech-dispatcher): texto como **argv aislado tras `--`** (seguro, sin shell); parada por
+  kill; la pausa por señales puede no silenciar el audio del daemon (documentado; se prefiere
+  `espeak-ng`).
+- **Proceso propio de grupo** (`detached`) para poder matar todo el árbol con `kill(-pid)`.
+- **Seguridad:** igual que en Windows — el texto nunca llega por línea de comandos con shell;
+  va por stdin o como un único elemento argv.
+- **Estado:** implementado y con **pruebas unitarias** (builders de argumentos + ciclo de vida
+  con spawn simulado), pero **no verificado en hardware real** de macOS/Linux. Se marca como
+  experimental y se piden reportes de la comunidad (plantilla de issue *Platform test report*).
+
 ## 8. Compatibilidad comprobada
 - **Windows 11 + PowerShell 5.1**: `list`, `test` y `controller` (SPEAK/PAUSE/RESUME/STOP/QUIT +
   `EVT done`, salida limpia) verificados manualmente. Voz es-ES disponible.

@@ -13,11 +13,7 @@ Write-Host '==> Removing old .vsix files...' -ForegroundColor Cyan
 Get-ChildItem -Path $root -Filter '*.vsix' -File | Remove-Item -Force
 
 Write-Host '==> Packaging .vsix...' -ForegroundColor Cyan
-# Local-only build: relative doc links are given a placeholder base URL so vsce
-# does not error about the missing repository.
-& npx vsce package --no-dependencies --allow-missing-repository `
-    --baseContentUrl 'https://local.invalid/tvc' `
-    --baseImagesUrl 'https://local.invalid/tvc'
+& npx vsce package --no-dependencies
 if ($LASTEXITCODE -ne 0) { throw "vsce package failed ($LASTEXITCODE)" }
 
 $vsix = Get-ChildItem -Path $root -Filter '*.vsix' -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1
