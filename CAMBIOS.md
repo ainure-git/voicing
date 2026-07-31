@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado [SemVer](https://semver.org/).
 
+## [0.1.2] — 2026-07-31
+
+### Corregido
+- **Dictado**: ya no usa el dictado de chat/editor de Cursor (escribe en el chat, en inglés). Solo se
+  usa dictado **nativo de terminal** si existe; en caso contrario se ofrece `/voice tap` de Claude Code.
+- **Leer selección**: eliminado el re-enfoque programático de la terminal, que podía **borrar la
+  selección** y romper la vía fiable. La forma fiable de leer una selección con el ratón es el
+  **clic derecho en la terminal → "Terminal Voice: Leer selección"** (la terminal mantiene el foco y
+  la selección). El botón de la barra de estado, al hacer clic, provoca que xterm pierda la selección;
+  por eso ofrece **Leer portapapeles** como alternativa (`Ctrl+C` y reproducir).
+
 ## [0.1.1] — 2026-07-31
 
 ### Corregido

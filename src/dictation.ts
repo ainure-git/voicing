@@ -8,20 +8,21 @@
 export const CLAUDE_VOICE_HINT = '/voice tap'
 
 /**
- * Picks the best available dictation command id, preferring terminal-specific
- * ones, then generic, then editor ones. Returns undefined when none is
- * registered.
+ * Picks a **terminal-scoped** dictation command, or undefined when none exists.
  *
- * The match is intentionally restricted to ids that actually mention
- * "dictation"/"dictate". A broader match on "voice" is unsafe: it matches this
- * very extension's auto-generated output-channel command
- * (`workbench.action.output.show.extension-output-...Terminal Voice Controls...`)
- * and its display name, which would make "Dictar" just open the Output panel.
+ * We deliberately only accept dictation commands that target the terminal. A
+ * generic editor/chat dictation command (e.g. Cursor's voice chat) types into
+ * the editor/chat — not the terminal — and is useless for dictating a terminal
+ * command; worse, it may be locked to English. When there is no terminal-native
+ * dictation, the caller falls back to Claude Code's `/voice tap`, which is the
+ * intended path for terminal dictation.
+ *
+ * The match also excludes this extension's own commands and the auto-generated
+ * output-channel command (whose id contains "Terminal Voice").
  */
 export function pickDictationCommand(commandIds: readonly string[]): string | undefined {
-  const isDictation = (id: string): boolean => {
+  const isTerminalDictation = (id: string): boolean => {
     const lower = id.toLowerCase()
-    // Never our own commands or any output-panel command.
     if (
       lower.includes('.output.') ||
       lower.includes('extension-output') ||
@@ -30,24 +31,8 @@ export function pickDictationCommand(commandIds: readonly string[]): string | un
     ) {
       return false
     }
-    return /dictation|dictate/.test(lower)
+    return lower.includes('terminal') && /dictation|dictate/.test(lower)
   }
 
-  const candidates = commandIds.filter(isDictation)
-  if (candidates.length === 0) {
-    return undefined
-  }
-
-  const score = (id: string): number => {
-    const lower = id.toLowerCase()
-    if (lower.includes('terminal')) {
-      return 3
-    }
-    if (lower.includes('editor')) {
-      return 1
-    }
-    return 2
-  }
-
-  return [...candidates].sort((a, b) => score(b) - score(a))[0]
+  return commandIds.find(isTerminalDictation)
 }
