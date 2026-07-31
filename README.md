@@ -1,135 +1,165 @@
-# Terminal Voice Controls
+<p align="center">
+  <img src="media/banner.png" alt="Voicing — Listen to your terminal. Dictate into it." width="100%">
+</p>
 
-Dicta y **escucha** el texto de la terminal integrada de Cursor o Visual Studio Code.
-Pensada para trabajar con Claude Code, Codex y otras herramientas de terminal: selecciona
-una respuesta larga y escúchala a ~×2, con pausa, reanudación y detención. Todo **local**,
-sin nube, sin claves API y sin telemetría.
+<h1 align="center">Voicing</h1>
 
-- 🎧 **Leer selección**: escucha el texto seleccionado en la terminal.
-- 📋 **Leer portapapeles**: alternativa fiable (copias con `Ctrl+C` y reproduces).
-- ⏯️ **Pausar / reanudar** y ⏹️ **detener** la lectura.
-- ⚡ **Velocidad ~×2** por defecto (configurable 0.5–3.0).
-- 🗣️ **Voz local de Windows** (System.Speech / SAPI), seleccionable.
-- 🎙️ **Dictar**: usa el dictado integrado del editor si existe; si no, te ayuda con `/voice tap` de Claude Code.
+<p align="center">
+  <b>Listen to your integrated terminal — and dictate into it.</b><br>
+  Select any terminal output (a long Claude Code / Codex answer, a stack trace, an error) and hear it read aloud at ~2×, with pause &amp; stop. 100% local: no cloud, no API keys, no telemetry.
+</p>
 
-> **Plataforma:** el motor de voz de esta versión está orientado a **Windows 10/11**.
-> En macOS/Linux la extensión no se rompe: el procesamiento de texto y los comandos siguen
-> disponibles, pero la lectura en voz avisa de que el motor es de Windows.
+<p align="center">
+  <a href="https://github.com/ainure-git/voicing/actions/workflows/ci.yml"><img src="https://github.com/ainure-git/voicing/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/tests-110%20passing-brightgreen" alt="tests">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
+  <img src="https://img.shields.io/badge/VS%20Code-%5E1.85-007ACC?logo=visualstudiocode&logoColor=white" alt="vscode engine">
+  <img src="https://img.shields.io/badge/telemetry-none-success" alt="no telemetry">
+</p>
+
+<p align="center">
+  Works in <b>VS Code</b>, <b>Cursor</b>, <b>Windsurf</b>, <b>VSCodium</b> and other VS Code-based editors · <b>Windows</b> · <b>macOS</b> · <b>Linux</b>
+</p>
 
 ---
 
-## Controles
+## ✨ Features
 
-Los controles aparecen en varios sitios (VS Code no permite a las extensiones poner botones
-directamente en la cabecera del panel de terminal, así que usamos las ubicaciones públicas):
+- 🔊 **Read the terminal aloud** — hear long answers instead of reading them.
+- 📋 **Read the clipboard** — a rock-solid fallback (`Ctrl+C`, then listen).
+- ⏯️ **Pause / resume** and ⏹️ **stop** — real controls, and a new read cleanly cancels the previous one.
+- ⚡ **~2× speed** by default, configurable `0.5–3.0`.
+- 🗣️ **Local OS voice**, selectable — Windows SAPI · macOS `say` · Linux `espeak-ng`/`spd-say`.
+- 🧹 **Smart text cleanup** — strips ANSI/control codes, converts Markdown, and can skip, announce, or read code blocks; improves pronunciation of paths, URLs, `camelCase`, `snake_case` and TypeScript errors.
+- 🎙️ **Dictate** — uses your editor's native terminal dictation if present; otherwise helps you use Claude Code's `/voice tap`.
+- 🔒 **Private by design** — the text you hear never leaves your machine. No accounts, no keys, no telemetry.
 
-| Control | Dónde aparece |
+## 🚀 Install
+
+### One-liner (recommended)
+
+Installs the latest release into **every** VS Code-family editor found on your machine.
+
+**macOS / Linux**
+```bash
+curl -fsSL https://raw.githubusercontent.com/ainure-git/voicing/main/scripts/install.sh | bash
+```
+
+**Windows (PowerShell)**
+```powershell
+irm https://raw.githubusercontent.com/ainure-git/voicing/main/scripts/install.ps1 | iex
+```
+
+Then **reload the window** (`Ctrl/Cmd + Shift + P` → *Developer: Reload Window*).
+
+### From the `.vsix` (always works)
+
+1. Download `voicing-<version>.vsix` from the [latest release](https://github.com/ainure-git/voicing/releases/latest).
+2. In your editor: `Ctrl/Cmd + Shift + P` → **Extensions: Install from VSIX…** → pick the file.
+3. Reload the window.
+
+Or from a terminal, with any of these CLIs:
+```bash
+code   --install-extension voicing-<version>.vsix   # VS Code / VSCodium
+cursor --install-extension voicing-<version>.vsix   # Cursor
+windsurf --install-extension voicing-<version>.vsix # Windsurf
+```
+
+> **Open VSX / Marketplace:** publishing is opt-in (see [release workflow](.github/workflows/release.yml)). Until then, use the one-liner or the `.vsix` above.
+
+## 🎧 Usage
+
+The controls live in the **status bar** (bottom-right, next to the 🔔), in the **Command Palette** (search *Voicing*), and in the **terminal right-click menu**.
+
+| Control | What it does |
 |---|---|
-| `$(mic)` Dictar | Barra de estado · Paleta de comandos · Menú contextual de la terminal |
-| `$(unmute)` Leer selección | Barra de estado · Paleta de comandos · Menú contextual de la terminal |
-| `$(debug-pause)` Pausar/Reanudar | Barra de estado (durante la lectura) · Paleta · Menú contextual |
-| `$(debug-stop)` Detener | Barra de estado (durante la lectura) · Paleta · Menú contextual |
+| `$(mic)` **Dictate** | Uses native terminal dictation if available, else inserts Claude Code's `/voice tap`. |
+| `$(unmute)` **Read selection** | Reads the current terminal selection. |
+| `$(clippy)` **Read clipboard** | Reads clipboard text (copy with `Ctrl+C` first). |
+| `$(debug-pause)` **Pause / resume** | Toggles playback (shown while active). |
+| `$(debug-stop)` **Stop** | Stops playback and cleans up the voice process. |
 
-Estado discreto en la barra de estado: **Preparando · Reproduciendo · Pausado · Detenido · Error**.
+**Reading a terminal selection** (choose whichever fits):
+- **Right-click** in the terminal → **Voicing: Read selection** — most reliable with the mouse (the terminal keeps focus &amp; selection).
+- Select → `Ctrl+C` → **Read clipboard** (or the status-bar 🔊, which offers it).
+- Bind a key to `voicing.readSelection` and trigger it while the terminal is focused.
 
-Todos los comandos están en la paleta (`Ctrl+Shift+P`) bajo **"Terminal Voice"**.
+> ℹ️ Clicking the status-bar 🔊 makes the terminal lose focus, and the editor clears the terminal selection at that moment — a platform limitation. That's why the right-click menu / clipboard paths are the reliable ones, and the button gracefully offers **Read clipboard**.
 
----
+## ⚙️ Configuration
 
-## Instalación en Cursor
+Search **“Voicing”** in Settings (or run **Voicing: Open settings**).
 
-1. Abre Cursor.
-2. `Ctrl + Shift + P`.
-3. Escribe y elige **`Extensions: Install from VSIX...`**.
-4. Selecciona `terminal-voice-controls-<versión>.vsix`.
-5. Recarga Cursor cuando lo pida.
-
-O ejecuta `INSTALAR_EN_CURSOR.bat` (incluido en la distribución) si tienes el comando `cursor` en el PATH.
-
-## Instalación en Visual Studio Code
-
-Igual que en Cursor: `Ctrl+Shift+P` → **`Extensions: Install from VSIX...`** → elige el `.vsix` → recarga.
-
----
-
-## Uso
-
-### Leer una selección de la terminal
-1. Selecciona texto con el ratón en la terminal integrada.
-2. Pulsa el botón `$(unmute)` de la barra de estado, o `Ctrl+Shift+P` → **Terminal Voice: Leer selección**.
-3. La extensión copia la selección de forma segura (con restauración del portapapeles) y la lee.
-
-Si no hay selección, verás: *"Selecciona texto de la terminal antes de reproducirlo"*.
-
-### Leer el portapapeles (alternativa)
-1. Copia con `Ctrl+C`.
-2. `Ctrl+Shift+P` → **Terminal Voice: Leer portapapeles**.
-
-### Pausar / reanudar / detener
-- **Pausar o reanudar**: botón `$(debug-pause)` / `$(debug-continue)` o **Terminal Voice: Pausar o reanudar**.
-- **Detener**: botón `$(debug-stop)` o **Terminal Voice: Detener**. Detiene realmente la voz y cierra el proceso.
-
-Una nueva lectura **cancela limpiamente** la anterior.
-
-### Dictado
-`Ctrl+Shift+P` → **Terminal Voice: Dictar**.
-- Si tu editor tiene un comando de dictado registrado, se ejecuta (se indica cuál en el log de diagnóstico).
-- Si no, se te ofrece insertar `/voice tap` (dictado nativo de Claude Code) en la terminal activa —
-  **no se envía solo**, tú decides cuándo pulsar Enter.
-
----
-
-## Configuración
-
-Ajustes → busca **"Terminal Voice"** (o `Ctrl+Shift+P` → **Terminal Voice: Abrir configuración**).
-
-| Ajuste | Por defecto | Descripción |
+| Setting | Default | Description |
 |---|---|---|
-| `terminalVoice.enabled` | `true` | Activa la extensión y sus controles. |
-| `terminalVoice.language` | `es-ES` | Idioma preferido de la voz. |
-| `terminalVoice.rate` | `2.0` | Velocidad 0.5–3.0 (2.0 ≈ ×2). |
-| `terminalVoice.volume` | `100` | Volumen 0–100. |
-| `terminalVoice.voice` | `""` | Voz exacta a usar (vacío = predeterminada). |
-| `terminalVoice.skipCodeBlocks` | `true` | Si es `false`, lee los bloques de código completos. |
-| `terminalVoice.codeBlockMode` | `announce` | `skip` · `announce` · `read`. |
-| `terminalVoice.maxCharacters` | `30000` | Máximo de caracteres; el resto se trunca con aviso. |
-| `terminalVoice.restoreClipboard` | `true` | Restaura el portapapeles tras leer la selección. |
-| `terminalVoice.showStatusBarControls` | `true` | Muestra los controles en la barra de estado. |
-| `terminalVoice.autoStopPrevious` | `true` | Una lectura nueva detiene la anterior. |
-| `terminalVoice.debugLogging` | `false` | Diagnóstico en el canal de salida (nunca el texto leído). |
+| `voicing.enabled` | `true` | Enable the extension and its controls. |
+| `voicing.language` | `es-ES` | Preferred voice language (used to pick a voice when none is fixed). |
+| `voicing.rate` | `2.0` | Speed multiplier `0.5–3.0` (2.0 ≈ double). |
+| `voicing.volume` | `100` | Volume `0–100`. |
+| `voicing.voice` | `""` | Exact voice name (empty = default). Use **Voicing: Show available voices**. |
+| `voicing.skipCodeBlocks` | `true` | If `false`, read code blocks in full. |
+| `voicing.codeBlockMode` | `announce` | `skip` · `announce` · `read`. |
+| `voicing.maxCharacters` | `30000` | Max characters to read (rest truncated with a notice). |
+| `voicing.restoreClipboard` | `true` | Restore the previous clipboard after reading a selection. |
+| `voicing.showStatusBarControls` | `true` | Show the status-bar controls. |
+| `voicing.autoStopPrevious` | `true` | A new read stops the previous one. |
+| `voicing.debugLogging` | `false` | Diagnostics in the output channel (never the read text). |
 
-### Cambiar la voz
-`Ctrl+Shift+P` → **Terminal Voice: Mostrar voces disponibles** → elige una. Se guarda en `terminalVoice.voice`.
-Prueba con **Terminal Voice: Probar voz**.
+No keyboard shortcuts are imposed (to avoid conflicts). Bind your own to any `voicing.*` command in **Keyboard Shortcuts**.
 
-### Velocidad ×2
-`terminalVoice.rate = 2.0`. La conversión a la escala del motor (SAPI −10..10) es aproximada;
-ver [`TECHNICAL_DECISIONS.md`](./TECHNICAL_DECISIONS.md).
+## 🖥️ Platform support
 
-### Atajos de teclado
-No se imponen atajos (para evitar conflictos). Puedes asignar los tuyos en
-**Preferencias: Abrir atajos de teclado** buscando los comandos `terminalVoice.*`.
+| Platform | Engine | Read | Stop | Speed / Voice | Pause / Resume | Status |
+|---|---|:--:|:--:|:--:|:--:|---|
+| **Windows 10/11** | `System.Speech` (SAPI) via PowerShell | ✅ | ✅ | ✅ | ✅ | **Verified** |
+| **macOS** | `say` | ✅ | ✅ | ✅ | ✅¹ | Experimental² |
+| **Linux** | `espeak-ng` / `espeak` | ✅ | ✅ | ✅ | ✅¹ | Experimental² |
+| **Linux** | `spd-say` (fallback) | ✅ | ✅ | ✅ | ⚠️³ | Experimental² |
+
+<sub>¹ Pause/resume via `SIGSTOP`/`SIGCONT`. ² Implemented and unit-tested (arg building + lifecycle) but not yet verified on real macOS/Linux hardware — testers welcome! ³ `spd-say` talks to a daemon, so pausing the client may not pause audio; prefer `espeak-ng` on Linux (`sudo apt install espeak-ng`).</sub>
+
+## 🔒 Privacy
+
+Everything runs locally. **No telemetry. No network. No API keys.** The text you listen to is synthesized by your OS's local voice and is never sent anywhere or stored, and never written to logs. To read a terminal selection the extension briefly uses the clipboard and then restores it. See [PRIVACY.md](PRIVACY.md).
+
+## 🧩 How it works
+
+The text pipeline cleans ANSI/control codes → handles code blocks → converts Markdown → improves pronunciation → truncates &amp; chunks. Each OS has a small TTS engine behind a shared interface; text is handed to the voice process **only over stdin (Base64 on Windows) or as an isolated argv element — never through a shell**, so command injection is impossible. Details in [TECHNICAL_DECISIONS.md](TECHNICAL_DECISIONS.md).
+
+## 🛠️ Development
+
+```bash
+npm ci
+npm run typecheck && npm run lint && npm test   # quality gates (110 unit tests)
+node esbuild.js --production                      # bundle
+npx vsce package --no-dependencies               # build the .vsix
+```
+
+Bump the version in `package.json`, then push a tag `vX.Y.Z` — the [release workflow](.github/workflows/release.yml) builds the `.vsix` and attaches it to a GitHub Release.
+
+## 🤝 Contributing
+
+Issues and PRs welcome — especially **macOS/Linux testing reports**. See [CONTRIBUTING.md](CONTRIBUTING.md). Security policy in [SECURITY.md](SECURITY.md).
+
+## 📄 License
+
+[MIT](LICENSE) · [Changelog](CAMBIOS.md) · [Troubleshooting](TROUBLESHOOTING.md)
 
 ---
 
-## Privacidad
-Todo es local. No hay telemetría, ni claves, ni envío del texto leído a ningún servidor.
-Ver [`PRIVACY.md`](./PRIVACY.md).
+<details>
+<summary><b>🇪🇸 Resumen en español</b></summary>
 
-## Limitaciones conocidas
-- Motor de voz solo Windows en esta versión (arquitectura preparada para añadir macOS/Linux).
-- Los botones no pueden colocarse en la cabecera del panel de terminal (limitación de la API pública de VS Code); se usan barra de estado, paleta y menú contextual.
-- La captura automática de selección depende del comando de copia de la terminal del editor; si no existe, usa **Leer portapapeles**.
-- La velocidad ×2 es aproximada (el motor usa una escala discreta).
+**Voicing** te permite **escuchar la terminal** y **dictar** en ella dentro de VS Code, Cursor, Windsurf, VSCodium, etc. Selecciona una respuesta larga (de Claude Code, Codex, un error…) y escúchala a ~2×, con pausa y parada. **100% local: sin nube, sin claves, sin telemetría** — no cuesta nada.
 
-## Solución de problemas
-Ver [`TROUBLESHOOTING.md`](./TROUBLESHOOTING.md).
+**Instalar (una línea):**
+- macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/ainure-git/voicing/main/scripts/install.sh | bash`
+- Windows: `irm https://raw.githubusercontent.com/ainure-git/voicing/main/scripts/install.ps1 | iex`
 
-## Cómo actualizar
-Instala el nuevo `.vsix` con **`Extensions: Install from VSIX...`** (sustituye la versión anterior) y recarga.
+Luego **recarga la ventana**. También puedes instalar el `.vsix` de la [última release](https://github.com/ainure-git/voicing/releases/latest) con **Extensions: Install from VSIX…**.
 
-## Cómo desinstalar
-Panel de **Extensiones** → **Terminal Voice Controls** → **Uninstall**. O ejecuta `DESINSTALAR_DE_CURSOR.bat`.
+**Leer una selección de la terminal (lo más fiable):** clic derecho en la terminal → **Voicing: Read selection**, o `Ctrl+C` → **Read clipboard**. Los iconos 🎤/🔊 están abajo a la derecha, junto a la 🔔.
 
-## Licencia
-MIT — ver [`LICENSE`](./LICENSE).
+Motores de voz: Windows (SAPI, verificado), macOS (`say`) y Linux (`espeak-ng`/`spd-say`) — estos dos últimos, experimentales (se agradecen pruebas). Más detalles en [TROUBLESHOOTING.md](TROUBLESHOOTING.md) y [PRIVACY.md](PRIVACY.md).
+
+</details>

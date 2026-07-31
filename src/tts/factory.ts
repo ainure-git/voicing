@@ -9,6 +9,8 @@ import { PlaybackStatus } from '../types'
 import { EngineLogger, TtsEngine, WindowsTtsEngine } from './engine'
 import { UnsupportedTtsEngine } from './unsupported'
 import { createWindowsSpawn, killTree, resolvePowerShellPath } from './windowsRuntime'
+import { PosixTtsEngine } from './posix'
+import { createPosixSpawn, detectPosixTool, killPosixTree } from './posixRuntime'
 
 export interface TtsFactoryOptions {
   /** Absolute path to the extension's installed directory. */
@@ -35,5 +37,21 @@ export function createTtsEngine(opts: TtsFactoryOptions): TtsEngine {
       logger: opts.logger,
     })
   }
+
+  if (opts.platform === 'darwin' || opts.platform === 'linux') {
+    const spec = detectPosixTool(opts.platform)
+    if (spec) {
+      opts.logger?.info(`Voicing: using POSIX TTS tool "${spec.command}"`)
+      return new PosixTtsEngine({
+        spec,
+        spawn: createPosixSpawn(),
+        killTree: killPosixTree,
+        onStatus: opts.onStatus,
+        onError: opts.onError,
+        logger: opts.logger,
+      })
+    }
+  }
+
   return new UnsupportedTtsEngine(opts.onStatus)
 }

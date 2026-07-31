@@ -29,23 +29,23 @@ export class StatusBarController {
 
   constructor() {
     // Lower priority = further right. Group them together on the right side.
-    this.status = this.make('terminalVoice.status', 96, '', undefined)
-    this.dictate = this.make('terminalVoice.sbDictate', 95, '$(mic)', 'terminalVoice.dictate', 'Terminal Voice: Dictar')
+    this.status = this.make('voicing.status', 96, '', undefined)
+    this.dictate = this.make('voicing.sbDictate', 95, '$(mic)', 'voicing.dictate', 'Voicing: Dictar')
     this.read = this.make(
-      'terminalVoice.sbRead',
+      'voicing.sbRead',
       94,
       '$(unmute)',
-      'terminalVoice.readSelection',
-      'Terminal Voice: Leer selección',
+      'voicing.readSelection',
+      'Voicing: Leer selección',
     )
     this.pauseResume = this.make(
-      'terminalVoice.sbPauseResume',
+      'voicing.sbPauseResume',
       93,
       '$(debug-pause)',
-      'terminalVoice.pauseResume',
-      'Terminal Voice: Pausar o reanudar',
+      'voicing.pauseResume',
+      'Voicing: Pausar o reanudar',
     )
-    this.stop = this.make('terminalVoice.sbStop', 92, '$(debug-stop)', 'terminalVoice.stop', 'Terminal Voice: Detener')
+    this.stop = this.make('voicing.sbStop', 92, '$(debug-stop)', 'voicing.stop', 'Voicing: Detener')
   }
 
   private make(
@@ -90,7 +90,7 @@ export class StatusBarController {
 
     if (active) {
       this.pauseResume.text = this.current === 'paused' ? '$(debug-continue)' : '$(debug-pause)'
-      this.pauseResume.tooltip = this.current === 'paused' ? 'Terminal Voice: Reanudar' : 'Terminal Voice: Pausar'
+      this.pauseResume.tooltip = this.current === 'paused' ? 'Voicing: Reanudar' : 'Voicing: Pausar'
       this.pauseResume.show()
       this.stop.show()
     } else {

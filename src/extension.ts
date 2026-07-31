@@ -14,12 +14,18 @@ import { createTtsEngine } from './tts/factory'
 import { readConfig, CONFIG_SECTION } from './configService'
 import { TtsEngine } from './tts/engine'
 import { disposeOneShots } from './tts/windowsRuntime'
+import { disposePosixOneShots } from './tts/posixRuntime'
 import { PlaybackStatus } from './types'
+
+function disposeAllOneShots(): void {
+  disposeOneShots()
+  disposePosixOneShots()
+}
 
 let engineRef: TtsEngine | undefined
 
 export function activate(context: vscode.ExtensionContext): void {
-  const channel = vscode.window.createOutputChannel('Terminal Voice Controls')
+  const channel = vscode.window.createOutputChannel('Voicing')
   const logger = new Logger(channel, () => readConfig().debugLogging)
   const state = new PlaybackState()
   const statusBar = new StatusBarController()
@@ -63,14 +69,14 @@ export function activate(context: vscode.ExtensionContext): void {
     )
   }
 
-  register('terminalVoice.readSelection', () => controller.readSelection())
-  register('terminalVoice.readClipboard', () => controller.readClipboard())
-  register('terminalVoice.pauseResume', () => controller.pauseResume())
-  register('terminalVoice.stop', () => controller.stop())
-  register('terminalVoice.testVoice', () => controller.testVoice())
-  register('terminalVoice.listVoices', () => controller.listVoices())
-  register('terminalVoice.dictate', () => controller.dictate())
-  register('terminalVoice.openSettings', () => controller.openSettings())
+  register('voicing.readSelection', () => controller.readSelection())
+  register('voicing.readClipboard', () => controller.readClipboard())
+  register('voicing.pauseResume', () => controller.pauseResume())
+  register('voicing.stop', () => controller.stop())
+  register('voicing.testVoice', () => controller.testVoice())
+  register('voicing.listVoices', () => controller.listVoices())
+  register('voicing.dictate', () => controller.dictate())
+  register('voicing.openSettings', () => controller.openSettings())
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
@@ -83,11 +89,11 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(channel, statusBar, {
     dispose: () => {
       void engine.dispose()
-      disposeOneShots()
+      disposeAllOneShots()
     },
   })
 
-  logger.info(`Terminal Voice Controls activated (platform: ${process.platform}, tts supported: ${engine.supported})`)
+  logger.info(`Voicing activated (platform: ${process.platform}, tts supported: ${engine.supported})`)
 }
 
 export function deactivate(): void {
@@ -95,5 +101,5 @@ export function deactivate(): void {
     void engineRef.dispose()
     engineRef = undefined
   }
-  disposeOneShots()
+  disposeAllOneShots()
 }

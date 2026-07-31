@@ -11,10 +11,10 @@ import { Logger } from './logger'
 import { readConfig } from './configService'
 import { TerminalVoiceConfig, PlaybackStatus } from './types'
 import { processText } from './textProcessing'
-import { multiplierToSapiRate } from './tts/rate'
 import { TtsEngine } from './tts/engine'
 import { scriptPathFor } from './tts/factory'
-import { resolvePowerShellPath, listInstalledVoices, speakTest } from './tts/windowsRuntime'
+import { InstalledVoice, resolvePowerShellPath, listInstalledVoices, speakTest } from './tts/windowsRuntime'
+import { detectPosixTool, posixListVoices, posixSpeakTest } from './tts/posixRuntime'
 import { captureTerminalSelection } from './selection/core'
 import { createSelectionDeps, resolveCopyCommand } from './selection/vscode'
 import { pickDictationCommand, CLAUDE_VOICE_HINT } from './dictation'
@@ -49,14 +49,14 @@ export class TerminalVoiceController {
       return
     }
     if (!vscode.window.activeTerminal) {
-      void vscode.window.showInformationMessage('Terminal Voice: no hay una terminal activa.')
+      void vscode.window.showInformationMessage('Voicing: no hay una terminal activa.')
       return
     }
 
     const copyCommand = await this.getCopyCommand()
     if (!copyCommand) {
       const choice = await vscode.window.showInformationMessage(
-        'Terminal Voice: no encuentro el comando para copiar la selección de la terminal. Copia con Ctrl+C y usa "Leer portapapeles".',
+        'Voicing: no encuentro el comando para copiar la selección de la terminal. Copia con Ctrl+C y usa "Leer portapapeles".',
         'Leer portapapeles',
       )
       if (choice === 'Leer portapapeles') {
@@ -76,7 +76,7 @@ export class TerminalVoiceController {
     } catch (err) {
       this.logger.error(`selection capture failed: ${(err as Error).message}`)
       this.updateStatus('idle')
-      void vscode.window.showErrorMessage('Terminal Voice: no se pudo leer la selección.')
+      void vscode.window.showErrorMessage('Voicing: no se pudo leer la selección.')
       return
     }
 
@@ -86,7 +86,7 @@ export class TerminalVoiceController {
     if (!captured) {
       this.updateStatus('idle')
       const choice = await vscode.window.showInformationMessage(
-        'Terminal Voice: no detecté selección en la terminal. Si seleccionaste texto, cópialo con Ctrl+C y pulsa "Leer portapapeles".',
+        'Voicing: no detecté selección en la terminal. Si seleccionaste texto, cópialo con Ctrl+C y pulsa "Leer portapapeles".',
         'Leer portapapeles',
       )
       if (choice === 'Leer portapapeles') {
@@ -108,7 +108,7 @@ export class TerminalVoiceController {
     }
     const text = await vscode.env.clipboard.readText()
     if (!text || text.trim().length === 0) {
-      void vscode.window.showInformationMessage('Terminal Voice: el portapapeles está vacío. Copia texto con Ctrl+C.')
+      void vscode.window.showInformationMessage('Voicing: el portapapeles está vacío. Copia texto con Ctrl+C.')
       return
     }
     await this.speak(text, config)
@@ -120,7 +120,7 @@ export class TerminalVoiceController {
     } else if (this.state.current === 'paused') {
       this.engine.resume()
     } else {
-      void vscode.window.showInformationMessage('Terminal Voice: no hay ninguna lectura activa.')
+      void vscode.window.showInformationMessage('Voicing: no hay ninguna lectura activa.')
     }
   }
 
@@ -130,40 +130,50 @@ export class TerminalVoiceController {
 
   async testVoice(): Promise<void> {
     const config = readConfig()
-    if (process.platform !== 'win32') {
-      this.notifyWindowsOnly()
-      return
-    }
     try {
-      await speakTest(
-        resolvePowerShellPath(),
-        scriptPathFor(this.extensionPath),
-        multiplierToSapiRate(config.rate),
-        config.volume,
-        config.voice,
-        config.language,
-      )
+      if (process.platform === 'win32') {
+        await speakTest(
+          resolvePowerShellPath(),
+          scriptPathFor(this.extensionPath),
+          config.rate,
+          config.volume,
+          config.voice,
+          config.language,
+        )
+        return
+      }
+      const spec = detectPosixTool(process.platform)
+      if (!spec) {
+        this.notifyUnsupported()
+        return
+      }
+      await posixSpeakTest(spec, config.rate, config.volume, config.voice, config.language)
     } catch (err) {
       this.logger.error(`test voice failed: ${(err as Error).message}`)
-      void vscode.window.showErrorMessage('Terminal Voice: no se pudo reproducir la voz de prueba.')
+      void vscode.window.showErrorMessage('Voicing: no se pudo reproducir la voz de prueba.')
     }
   }
 
   async listVoices(): Promise<void> {
-    if (process.platform !== 'win32') {
-      this.notifyWindowsOnly()
-      return
-    }
-    let voices
+    let voices: InstalledVoice[]
     try {
-      voices = await listInstalledVoices(resolvePowerShellPath(), scriptPathFor(this.extensionPath))
+      if (process.platform === 'win32') {
+        voices = await listInstalledVoices(resolvePowerShellPath(), scriptPathFor(this.extensionPath))
+      } else {
+        const spec = detectPosixTool(process.platform)
+        if (!spec) {
+          this.notifyUnsupported()
+          return
+        }
+        voices = posixListVoices(spec)
+      }
     } catch (err) {
       this.logger.error(`list voices failed: ${(err as Error).message}`)
-      void vscode.window.showErrorMessage('Terminal Voice: no se pudieron enumerar las voces instaladas.')
+      void vscode.window.showErrorMessage('Voicing: no se pudieron enumerar las voces instaladas.')
       return
     }
     if (voices.length === 0) {
-      void vscode.window.showInformationMessage('Terminal Voice: no hay voces instaladas en el sistema.')
+      void vscode.window.showInformationMessage('Voicing: no hay voces instaladas (o no se pudieron enumerar).')
       return
     }
 
@@ -176,9 +186,9 @@ export class TerminalVoiceController {
     )
     if (picked) {
       await vscode.workspace
-        .getConfiguration('terminalVoice')
+        .getConfiguration('voicing')
         .update('voice', picked.label, vscode.ConfigurationTarget.Global)
-      void vscode.window.showInformationMessage(`Terminal Voice: voz seleccionada "${picked.label}".`)
+      void vscode.window.showInformationMessage(`Voicing: voz seleccionada "${picked.label}".`)
     }
   }
 
@@ -191,13 +201,13 @@ export class TerminalVoiceController {
         await vscode.commands.executeCommand(command)
       } catch (err) {
         this.logger.error(`dictation command failed: ${(err as Error).message}`)
-        void vscode.window.showErrorMessage('Terminal Voice: el comando de dictado integrado falló.')
+        void vscode.window.showErrorMessage('Voicing: el comando de dictado integrado falló.')
       }
       return
     }
 
     const choice = await vscode.window.showInformationMessage(
-      'Terminal Voice: no hay dictado integrado disponible en esta versión. Puedes usar el dictado nativo de Claude Code con "/voice tap".',
+      'Voicing: no hay dictado integrado disponible en esta versión. Puedes usar el dictado nativo de Claude Code con "/voice tap".',
       'Insertar "/voice tap"',
       'Abrir configuración',
     )
@@ -208,7 +218,7 @@ export class TerminalVoiceController {
         // Insert without a trailing newline: the user decides when to send it.
         terminal.sendText(CLAUDE_VOICE_HINT, false)
       } else {
-        void vscode.window.showInformationMessage('Terminal Voice: abre una terminal para insertar el comando.')
+        void vscode.window.showInformationMessage('Voicing: abre una terminal para insertar el comando.')
       }
     } else if (choice === 'Abrir configuración') {
       await this.openSettings()
@@ -216,14 +226,14 @@ export class TerminalVoiceController {
   }
 
   async openSettings(): Promise<void> {
-    await vscode.commands.executeCommand('workbench.action.openSettings', 'terminalVoice')
+    await vscode.commands.executeCommand('workbench.action.openSettings', 'voicing')
   }
 
   // --- Internals -----------------------------------------------------------
 
   private async speak(rawText: string, config: TerminalVoiceConfig): Promise<void> {
     if (!this.engine.supported) {
-      this.notifyWindowsOnly()
+      this.notifyUnsupported()
       this.updateStatus('idle')
       return
     }
@@ -231,12 +241,12 @@ export class TerminalVoiceController {
     const { chunks, truncated } = processText(rawText, config)
     if (chunks.length === 0) {
       this.updateStatus('idle')
-      void vscode.window.showInformationMessage('Terminal Voice: no hay texto legible para reproducir.')
+      void vscode.window.showInformationMessage('Voicing: no hay texto legible para reproducir.')
       return
     }
     if (truncated) {
       void vscode.window.showWarningMessage(
-        `Terminal Voice: el texto superaba ${config.maxCharacters} caracteres y se truncó.`,
+        `Voicing: el texto superaba ${config.maxCharacters} caracteres y se truncó.`,
       )
     }
 
@@ -244,7 +254,7 @@ export class TerminalVoiceController {
     try {
       await this.engine.read({
         chunks,
-        sapiRate: multiplierToSapiRate(config.rate),
+        rate: config.rate,
         volume: config.volume,
         voice: config.voice,
         language: config.language,
@@ -252,7 +262,7 @@ export class TerminalVoiceController {
     } catch (err) {
       this.logger.error(`speak failed: ${(err as Error).message}`)
       this.updateStatus('error')
-      void vscode.window.showErrorMessage('Terminal Voice: no se pudo iniciar la lectura.')
+      void vscode.window.showErrorMessage('Voicing: no se pudo iniciar la lectura.')
     }
   }
 
@@ -273,16 +283,20 @@ export class TerminalVoiceController {
   private ensureCanStart(config: TerminalVoiceConfig): boolean {
     if (!config.autoStopPrevious && this.state.isActive) {
       void vscode.window.showInformationMessage(
-        'Terminal Voice: ya hay una lectura en curso. Deténla primero, o activa "autoStopPrevious".',
+        'Voicing: ya hay una lectura en curso. Deténla primero, o activa "autoStopPrevious".',
       )
       return false
     }
     return true
   }
 
-  private notifyWindowsOnly(): void {
+  private notifyUnsupported(): void {
+    const hint =
+      process.platform === 'linux'
+        ? ' Instala "espeak-ng" (o "speech-dispatcher") y recarga.'
+        : ''
     void vscode.window.showInformationMessage(
-      'Terminal Voice: el motor de voz de esta versión está orientado a Windows. La lectura no está disponible en este sistema.',
+      `Voicing: no se encontró un motor de voz local en este sistema.${hint}`,
     )
   }
 }

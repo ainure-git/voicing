@@ -32,7 +32,7 @@ foreach ($doc in $docs) {
     Copy-Item $src -Destination $dist
 }
 
-$zipName = "terminal-voice-controls-$version.zip"
+$zipName = "voicing-$version.zip"
 $zipPath = Join-Path $dist $zipName
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
 

@@ -1,11 +1,11 @@
 @echo off
 setlocal enabledelayedexpansion
-title Desinstalar Terminal Voice Controls de Cursor
+title Desinstalar Voicing de Cursor
 
-set "EXTID=eureka-local.terminal-voice-controls"
+set "EXTID=ainure.voicing"
 
 echo ==========================================================
-echo   Desinstalar Terminal Voice Controls de Cursor
+echo   Desinstalar Voicing de Cursor
 echo ==========================================================
 echo.
 echo Extension: !EXTID!
@@ -19,7 +19,7 @@ if errorlevel 1 (
   echo DESINSTALACION MANUAL:
   echo   1. Abre Cursor.
   echo   2. Ve al panel de Extensiones (Ctrl+Shift+X).
-  echo   3. Busca "Terminal Voice Controls".
+  echo   3. Busca "Voicing".
   echo   4. Pulsa el engranaje ^> Uninstall (Desinstalar).
   echo   5. Recarga Cursor.
   echo.
