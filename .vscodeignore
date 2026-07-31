@@ -11,6 +11,7 @@ distribucion/**
 
 # Repo assets that don't need to ship inside the VSIX (icon.png IS shipped).
 media/banner.png
+media/demo.gif
 media/*.psd
 CONTRIBUTING.md
 CODE_OF_CONDUCT.md

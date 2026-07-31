@@ -22,6 +22,10 @@
   Works in <b>VS Code</b>, <b>Cursor</b>, <b>Windsurf</b>, <b>VSCodium</b> and other VS Code-based editors · <b>Windows</b> · <b>macOS</b> · <b>Linux</b>
 </p>
 
+<p align="center">
+  <img src="media/demo.gif" alt="Select terminal text, right-click, Voicing: Read selection, and listen" width="82%">
+</p>
+
 ---
 
 ## ✨ Features
