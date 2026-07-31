@@ -1,11 +1,11 @@
 ========================================
-  TERMINAL VOICE CONTROLS - INSTALACION
+  VOICING - INSTALACION
 ========================================
 
-Para escuchar y dictar texto en la terminal de Cursor.
+Escucha la terminal (y dicta en ella) en Cursor / VS Code / Windsurf.
 Instalacion sencilla (no necesitas conocimientos tecnicos):
 
-1. Abre Cursor.
+1. Abre tu editor (Cursor, VS Code, Windsurf...).
 
 2. Pulsa a la vez:  Ctrl  +  Mayus (Shift)  +  P
 
@@ -13,16 +13,11 @@ Instalacion sencilla (no necesitas conocimientos tecnicos):
    y elige la opcion  "Extensions: Install from VSIX..."
 
 4. Selecciona el archivo:
-       terminal-voice-controls-<version>.vsix
+       voicing-<version>.vsix
    (esta en esta misma carpeta)
 
-5. Cuando Cursor lo pida, pulsa  "Reload"  (Recargar).
-
-6. Ya esta instalado. Para probarlo:
-   - Selecciona con el raton un texto dentro de la terminal.
-   - Pulsa el boton del altavoz  (icono de sonido)  en la
-     barra inferior (barra de estado), a la derecha.
-   - O pulsa Ctrl+Shift+P y escribe "Terminal Voice: Leer seleccion".
+5. Cuando te lo pida, pulsa  "Reload"  (Recargar la ventana).
+   *** Este paso de recargar es IMPRESCINDIBLE ***
 
 ----------------------------------------
  SI PREFIERES EL INSTALADOR AUTOMATICO
@@ -31,25 +26,53 @@ Haz doble clic en:  INSTALAR_EN_CURSOR.bat
 (Funciona si tienes el comando "cursor" disponible. Si no,
  usa los pasos 1-5 de arriba, que siempre funcionan.)
 
-----------------------------------------
- CONTROLES
-----------------------------------------
-  Altavoz            -> Leer la seleccion de la terminal
-  Pausa / Continuar  -> Pausar o reanudar la lectura
-  Detener            -> Parar la lectura
-  Microfono          -> Dictar
+O, mas facil todavia, abre PowerShell y pega:
+  irm https://raw.githubusercontent.com/ainure-git/voicing/main/scripts/install.ps1 | iex
 
-  Tambien: Ctrl+Shift+P y escribe "Terminal Voice".
+----------------------------------------
+ DONDE ESTAN LOS CONTROLES
+----------------------------------------
+  - Barra inferior derecha (junto a la campana): iconos de
+    microfono y altavoz.
+  - Ctrl+Shift+P y escribe "Voicing".
+  - Clic derecho dentro de la terminal.
+
+----------------------------------------
+ COMO ESCUCHAR (lo mas fiable)
+----------------------------------------
+  1) Selecciona texto con el raton en la terminal.
+  2) CLIC DERECHO dentro de la terminal ->
+     "Voicing: Read selection".
+
+  Alternativa que siempre funciona:
+     Selecciona -> Ctrl+C -> pulsa el altavoz
+     (o "Voicing: Read clipboard").
+
+  Nota: pulsar el icono del altavoz directamente puede perder
+  la seleccion (es un limite de VS Code); por eso se recomienda
+  el clic derecho o copiar con Ctrl+C.
 
 ----------------------------------------
  VELOCIDAD Y VOZ
 ----------------------------------------
-  - Velocidad: Ajustes -> busca "Terminal Voice" -> "rate" (2.0 = doble).
-  - Voz: Ctrl+Shift+P -> "Terminal Voice: Mostrar voces disponibles".
+  - Velocidad: Ajustes -> busca "Voicing" -> "rate" (2.0 = doble).
+  - Voz: Ctrl+Shift+P -> "Voicing: Show available voices".
+  - Probar: "Voicing: Test voice".
+  - Sin voz en espanol (Windows)? Configuracion de Windows ->
+    Hora e idioma -> Voz -> anade una voz espanola y eligela.
+
+----------------------------------------
+ DICTAR (MICROFONO)
+----------------------------------------
+  El microfono usa el dictado nativo del editor si existe; si no,
+  inserta "/voice tap" (el dictado de Claude Code).
+  => El microfono solo es util si usas Claude Code.
+     El ALTAVOZ funciona siempre.
 
 ----------------------------------------
  PRIVACIDAD
 ----------------------------------------
   Todo funciona en tu ordenador. No se envia nada a Internet.
+  Sin nube, sin claves, sin telemetria.
 
 Si algo no funciona, abre TROUBLESHOOTING.md.
