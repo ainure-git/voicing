@@ -16,10 +16,16 @@
 - Si hay voz pero no la usa, fija `terminalVoice.voice` con el nombre exacto que muestra la lista.
 
 ## No se detecta la selección
-- Asegúrate de **seleccionar** el texto en la terminal antes de pulsar "Leer selección".
-- Si ves *"no encuentro el comando para copiar la selección"*, usa **Leer portapapeles**:
-  copia con `Ctrl+C` y ejecuta **Terminal Voice: Leer portapapeles**.
-- Algunos temas/terminales requieren clic dentro de la terminal para darle foco antes de seleccionar.
+Al **hacer clic en el botón de la barra de estado**, la terminal pierde el foco y xterm **borra la
+selección** antes de que se pueda copiar (limitación de VS Code/xterm). Formas fiables de leer una
+selección:
+- **Recomendada (ratón):** haz **clic derecho** dentro de la terminal → **"Terminal Voice: Leer
+  selección"**. La terminal mantiene el foco y la selección, así que la copia funciona.
+- **Siempre funciona:** selecciona → `Ctrl+C` → botón del altavoz/`Terminal Voice: Leer portapapeles`.
+- **Con atajo propio:** asigna una tecla a `terminalVoice.readSelection` (Preferencias → Atajos de
+  teclado); al dispararla desde la terminal enfocada, la copia funciona.
+- Si prefieres, el botón del altavoz, cuando no detecta selección, te ofrece directamente **Leer
+  portapapeles**.
 
 ## El dictado integrado no está disponible
 - Es normal en muchas versiones: no todas exponen un comando de dictado.

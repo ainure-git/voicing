@@ -2,7 +2,7 @@
   "name": "terminal-voice-controls",
   "displayName": "Terminal Voice Controls",
   "description": "Dicta y escucha texto de la terminal integrada (lectura a ~x2, pausa/detención, voz local de Windows). Sin nube, sin telemetría.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "eureka-local",
   "license": "MIT",
   "engines": {
