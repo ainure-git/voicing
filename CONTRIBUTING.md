@@ -42,6 +42,7 @@ Conventional-ish: `type(scope): description` (e.g. `fix(tts): …`, `docs: …`)
 
 ## Releasing
 
-Bump `version` in `package.json`, update `CAMBIOS.md`, then push a tag
-`vX.Y.Z`. The release workflow builds the `.vsix` and attaches it to a GitHub
-Release. See [.github/workflows/release.yml](.github/workflows/release.yml).
+Bump `version` in `package.json`, update `CAMBIOS.md`, then build and publish the
+`.vsix` (e.g. `scripts/release.ps1` on Windows, or `npx vsce package
+--no-dependencies` + `gh release create`). Optional GitHub Actions workflows can
+automate build+release on a `vX.Y.Z` tag once enabled.

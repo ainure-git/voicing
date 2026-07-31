@@ -10,7 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ainure-git/voicing/actions/workflows/ci.yml"><img src="https://github.com/ainure-git/voicing/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/ainure-git/voicing/releases/latest"><img src="https://img.shields.io/github/v/release/ainure-git/voicing?label=release&color=0B7285" alt="release"></a>
+  <a href="https://github.com/ainure-git/voicing/releases/latest"><img src="https://img.shields.io/github/downloads/ainure-git/voicing/total?color=success" alt="downloads"></a>
   <img src="https://img.shields.io/badge/tests-110%20passing-brightgreen" alt="tests">
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="license">
   <img src="https://img.shields.io/badge/VS%20Code-%5E1.85-007ACC?logo=visualstudiocode&logoColor=white" alt="vscode engine">
@@ -65,7 +66,7 @@ cursor --install-extension voicing-<version>.vsix   # Cursor
 windsurf --install-extension voicing-<version>.vsix # Windsurf
 ```
 
-> **Open VSX / Marketplace:** publishing is opt-in (see [release workflow](.github/workflows/release.yml)). Until then, use the one-liner or the `.vsix` above.
+> **Open VSX / Marketplace:** publishing is opt-in. Until then, use the one-liner or the `.vsix` above.
 
 ## 🎧 Usage
 
@@ -135,7 +136,7 @@ node esbuild.js --production                      # bundle
 npx vsce package --no-dependencies               # build the .vsix
 ```
 
-Bump the version in `package.json`, then push a tag `vX.Y.Z` — the [release workflow](.github/workflows/release.yml) builds the `.vsix` and attaches it to a GitHub Release.
+Bump the version in `package.json`, run `scripts/release.ps1` (Windows) to build the `.vsix` + distribution bundle, and attach it to a GitHub Release. Optional CI/Release GitHub Actions are available to automate this on tag push.
 
 ## 🤝 Contributing
 
