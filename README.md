@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <img src="media/demo.gif" alt="Select terminal text, right-click, Voicing: Read selection, and listen" width="82%">
+  <img src="media/demo.gif" alt="Click the speaker in the status bar to read terminal output aloud; click the mic to dictate" width="82%">
 </p>
 
 ---
